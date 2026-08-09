@@ -4,8 +4,8 @@ import { AuthProvider } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 
 export const metadata: Metadata = {
-  title: 'Blog cá nhân',
-  description: 'Trang blog cá nhân — viết bài, chia sẻ ảnh, tương tác',
+  title: 'Lặng lẽ 24',
+  description: 'Trang cá nhân — viết bài, chia sẻ ảnh, linh tinh',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

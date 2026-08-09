@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import ReactionBar from '@/components/ReactionBar';
 import CommentSection from '@/components/CommentSection';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 type Post = {
   id: string;
@@ -23,6 +25,36 @@ async function getPost(slug: string): Promise<Post | null> {
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPost(params.slug);
+  if (!post) return { title: 'Không tìm thấy bài viết' };
+
+  const description = post.content.replace(/<[^>]+>/g, '').slice(0, 160);
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      type: 'article',
+      publishedTime: post.publishedAt,
+      authors: [post.author.name],
+      images: post.coverImage ? [{ url: post.coverImage }] : undefined,
+      url: `${SITE_URL}/posts/${post.slug}`,
+    },
+    twitter: {
+      card: post.coverImage ? 'summary_large_image' : 'summary',
+      title: post.title,
+      description,
+      images: post.coverImage ? [post.coverImage] : undefined,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/posts/${post.slug}`,
+    },
+  };
 }
 
 export default async function PostDetailPage({ params }: { params: { slug: string } }) {

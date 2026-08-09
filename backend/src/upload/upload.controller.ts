@@ -4,9 +4,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UploadService } from './upload.service';
 
 class PresignDto {
-  @IsIn(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-  contentType: string;
-
   @IsOptional() @IsIn(['posts', 'avatars'])
   folder?: 'posts' | 'avatars';
 }
@@ -18,6 +15,6 @@ export class UploadController {
   @UseGuards(JwtAuthGuard)
   @Post('presign')
   presign(@Req() req: any, @Body() dto: PresignDto) {
-    return this.uploadService.createPresignedUpload(req.user.userId, dto.contentType, dto.folder);
+    return this.uploadService.createSignedUpload(req.user.userId, dto.folder);
   }
 }

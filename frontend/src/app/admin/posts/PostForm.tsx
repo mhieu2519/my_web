@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api-client';
+import { uploadToCloudinary } from '@/lib/upload';
 import PostEditor from '@/components/PostEditor';
 
 type InitialData = {
@@ -28,9 +29,8 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const presign = await api.post('/upload/presign', { contentType: file.type, folder: 'posts' });
-    await fetch(presign.data.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
-    setCoverImage(presign.data.publicUrl);
+    const url = await uploadToCloudinary(file, 'posts');
+    setCoverImage(url);
   }
 
   async function handleSubmit(status: 'DRAFT' | 'PUBLISHED') {

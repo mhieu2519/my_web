@@ -10,7 +10,7 @@ export default function Header() {
     <header className="border-b bg-white">
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="font-semibold text-lg text-brand">
-          Blog của tôi
+          Lặng lẽ 24
         </Link>
         <nav className="flex items-center gap-4 text-sm">
           {loading ? null : user ? (

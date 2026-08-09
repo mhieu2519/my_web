@@ -4,23 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ImageExtension from '@tiptap/extension-image';
 import { useCallback, useRef } from 'react';
-import { api } from '@/lib/api-client';
-
-async function uploadImage(file: File): Promise<string> {
-  const presign = await api.post('/upload/presign', {
-    contentType: file.type,
-    folder: 'posts',
-  });
-  const { uploadUrl, publicUrl } = presign.data;
-
-  await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  });
-
-  return publicUrl;
-}
+import { uploadToCloudinary } from '@/lib/upload';
 
 export default function PostEditor({
   content,
@@ -46,7 +30,7 @@ export default function PostEditor({
     async (file: File) => {
       if (!editor) return;
       try {
-        const url = await uploadImage(file);
+        const url = await uploadToCloudinary(file, 'posts');
         editor.chain().focus().setImage({ src: url }).run();
       } catch (err) {
         alert('Tải ảnh lên thất bại. Vui lòng thử lại.');

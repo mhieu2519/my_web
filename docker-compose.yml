@@ -1,0 +1,45 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blog-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    # Nếu dùng Neon (Postgres cloud) thì không cần "depends_on" DB nào ở đây.
+    # Nếu muốn test với Postgres chạy local, bỏ comment khối "db" bên dưới
+    # và đổi DATABASE_URL trong backend/.env thành: postgresql://postgres:postgres@db:5432/blog
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+    container_name: blog-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      INTERNAL_API_URL: http://backend:4000/api
+    depends_on:
+      - backend
+  # --- Tuỳ chọn: Postgres chạy local để test không cần Neon ---
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: blog-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: blog
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - blog_db_data:/var/lib/postgresql/data
+
+  # volumes:
+  #   blog_db_data:

@@ -5,7 +5,7 @@ import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private async generateUniqueSlug(title: string) {
     const base = slugify(title, { lower: true, strict: true, locale: 'vi' });
@@ -18,7 +18,7 @@ export class PostsService {
   }
 
   private async resolveTags(tagNames: string[] = []) {
-    const tags = [];
+    const tags: { id: string }[] = [];
     for (const name of tagNames) {
       const slug = slugify(name, { lower: true, strict: true, locale: 'vi' });
       const tag = await this.prisma.tag.upsert({
