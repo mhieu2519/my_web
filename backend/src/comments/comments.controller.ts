@@ -3,10 +3,18 @@ import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
-
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 @Controller('comments')
 export class CommentsController {
   constructor(private commentsService: CommentsService) { }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get('admin/all')
+  findAllAdmin(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    return this.commentsService.findAllAdmin(Number(page) || 1, Number(pageSize) || 20);
+  }
 
   @Get()
   findByPost(@Query('postId') postId: string) {
@@ -31,4 +39,5 @@ export class CommentsController {
   remove(@Req() req: any, @Param('id') id: string) {
     return this.commentsService.remove(id, req.user.userId, req.user.role);
   }
+
 }

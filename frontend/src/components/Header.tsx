@@ -20,7 +20,9 @@ export default function Header() {
                   Quản trị
                 </Link>
               )}
-              <span className="text-gray-600">Xin chào, {user.name}</span>
+              <Link href="/profile" className="hover:text-brand">
+                Xin chào, {user.name}
+              </Link>
               <button onClick={() => logout()} className="text-red-600 hover:underline">
                 Đăng xuất
               </button>

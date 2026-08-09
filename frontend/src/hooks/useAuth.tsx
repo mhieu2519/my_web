@@ -9,6 +9,7 @@ type User = {
   name: string;
   role: 'ADMIN' | 'USER';
   avatarUrl?: string | null;
+  emailVerified?: boolean;
 };
 
 type AuthContextType = {
@@ -17,6 +18,8 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  loginWithToken: (accessToken: string) => Promise<void>;
+  refreshMe: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -37,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Thử refresh ngay khi load app (nếu có cookie refresh_token hợp lệ)
     (async () => {
       if (!getAccessToken()) {
         try {
@@ -73,8 +75,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  // Dùng cho callback Google OAuth: đã có accessToken, chỉ cần set + load /me
+  async function loginWithToken(accessToken: string) {
+    setAccessToken(accessToken);
+    await loadMe();
+  }
+
+  async function refreshMe() {
+    await loadMe();
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithToken, refreshMe }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,7 +4,7 @@ import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findByPost(postId: string) {
     // Lấy toàn bộ comment của bài, dựng cây reply ở tầng service để FE nhận sẵn cấu trúc lồng
@@ -66,5 +66,20 @@ export class CommentsService {
     }
     await this.prisma.comment.delete({ where: { id } });
     return { success: true };
+  }
+  async findAllAdmin(page = 1, pageSize = 20) {
+    const [items, total] = await Promise.all([
+      this.prisma.comment.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          author: { select: { id: true, name: true } },
+          post: { select: { id: true, title: true, slug: true } },
+        },
+      }),
+      this.prisma.comment.count(),
+    ]);
+    return { items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 }

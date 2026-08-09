@@ -27,19 +27,47 @@ enum ReactionType {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?
+  googleId      String?  @unique
+  emailVerified Boolean  @default(false)
+  isBanned      Boolean  @default(false)
   name          String
   avatarUrl     String?
-  role          Role           @default(USER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  posts         Post[]
-  comments      Comment[]
-  reactions     Reaction[]
-  refreshTokens RefreshToken[]
+  posts              Post[]
+  comments           Comment[]
+  reactions          Reaction[]
+  refreshTokens      RefreshToken[]
+  passwordResets     PasswordResetToken[]
+  emailVerifications EmailVerificationToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model RefreshToken {
@@ -68,9 +96,9 @@ model Post {
   updatedAt   DateTime   @updatedAt
   publishedAt DateTime?
 
-  tags        Tag[]      @relation("PostToTag")
-  comments    Comment[]
-  reactions   Reaction[]
+  tags      Tag[]      @relation("PostToTag")
+  comments  Comment[]
+  reactions Reaction[]
 
   @@index([status, publishedAt])
 }

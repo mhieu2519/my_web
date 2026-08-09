@@ -3,11 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.user.findMany({
-      select: { id: true, email: true, name: true, role: true, avatarUrl: true, createdAt: true },
+      select: {
+        id: true, email: true, name: true, role: true, avatarUrl: true,
+        isBanned: true, emailVerified: true, createdAt: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -35,5 +38,18 @@ export class UsersService {
       data: { role },
       select: { id: true, email: true, name: true, role: true },
     });
+  }
+
+  async setBanned(id: string, isBanned: boolean) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isBanned },
+      select: { id: true, email: true, name: true, role: true, isBanned: true },
+    });
+  }
+
+  async remove(id: string) {
+    await this.prisma.user.delete({ where: { id } });
+    return { success: true };
   }
 }

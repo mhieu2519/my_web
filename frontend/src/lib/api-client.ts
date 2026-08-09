@@ -60,3 +60,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+export function getGoogleLoginUrl() {
+  return `${API_URL}/auth/google`;
+}

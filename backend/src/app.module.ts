@@ -9,6 +9,9 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { UploadModule } from './upload/upload.module';
+import { MailModule } from './mail/mail.module';
+import { TagsModule } from './tags/tags.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -21,7 +24,10 @@ import { UploadModule } from './upload/upload.module';
     CommentsModule,
     ReactionsModule,
     UploadModule,
+    MailModule,
+    TagsModule,
+    StatsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule {}
+export class AppModule { }

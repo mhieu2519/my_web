@@ -1,10 +1,12 @@
-import { Controller, Post, Body, Res, Req, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 
 const REFRESH_COOKIE = 'refresh_token';
 const cookieOptions = {
@@ -20,6 +22,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private prisma: PrismaService,
+    private config: ConfigService,
   ) { }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -36,6 +39,23 @@ export class AuthController {
     const { accessToken, refreshToken, user } = await this.authService.login(dto);
     res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions);
     return { accessToken, user };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // Passport tự redirect sang Google
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: any, @Res() res: Response) {
+    const user = req.user;
+    const { accessToken, refreshToken } = await this.authService.issueTokensForUser(
+      user.id, user.email, user.role,
+    );
+    res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions);
+    res.redirect(`${this.config.get('FRONTEND_URL')}/auth/callback?accessToken=${accessToken}`);
   }
 
   @Post('refresh')
@@ -57,10 +77,36 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async me(@Req() req: any) {
-    const user = await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { id: true, email: true, name: true, role: true, avatarUrl: true, createdAt: true },
+      select: {
+        id: true, email: true, name: true, role: true, avatarUrl: true,
+        emailVerified: true, createdAt: true,
+      },
     });
-    return user;
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @Get('verify-email')
+  verifyEmail(@Req() req: Request) {
+    const token = req.query.token as string;
+    return this.authService.verifyEmail(token);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Post('resend-verification')
+  resendVerification(@Req() req: any) {
+    return this.authService.resendVerification(req.user.userId);
   }
 }
