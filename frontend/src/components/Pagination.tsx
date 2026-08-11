@@ -10,29 +10,28 @@ export default function Pagination({
     basePath: string;
 }) {
     if (totalPages <= 1) return null;
-
     const buildHref = (page: number) => `${basePath}?page=${page}`;
 
     return (
-        <div className="flex items-center justify-center gap-3 mt-10">
+        <div className="flex items-center justify-center gap-4 mt-12">
             {currentPage > 1 ? (
-                <Link href={buildHref(currentPage - 1)} className="px-4 py-2 border rounded hover:bg-gray-100 text-sm">
-                    ← Trang trước
+                <Link href={buildHref(currentPage - 1)} className="btn-outline text-sm">
+                    ← Trước
                 </Link>
             ) : (
-                <span className="px-4 py-2 border rounded text-sm text-gray-300 cursor-not-allowed">← Trang trước</span>
+                <span className="px-5 py-2.5 rounded-full text-sm text-gray-300 border-2 border-gray-100">← Trước</span>
             )}
 
-            <span className="text-sm text-gray-500">
-                Trang {currentPage} / {totalPages}
+            <span className="text-sm font-medium text-gray-500">
+                {currentPage} / {totalPages}
             </span>
 
             {currentPage < totalPages ? (
-                <Link href={buildHref(currentPage + 1)} className="px-4 py-2 border rounded hover:bg-gray-100 text-sm">
-                    Trang sau →
+                <Link href={buildHref(currentPage + 1)} className="btn-primary text-sm">
+                    Sau →
                 </Link>
             ) : (
-                <span className="px-4 py-2 border rounded text-sm text-gray-300 cursor-not-allowed">Trang sau →</span>
+                <span className="px-5 py-2.5 rounded-full text-sm text-gray-300 border-2 border-gray-100">Sau →</span>
             )}
         </div>
     );

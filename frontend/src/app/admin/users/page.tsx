@@ -49,48 +49,54 @@ function Content() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Quản lý người dùng</h1>
+            <h1 className="text-2xl font-bold mb-8 heading-gradient inline-block">Quản lý người dùng</h1>
             {loading ? (
                 <p className="text-gray-400">Đang tải...</p>
             ) : (
-                <table className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
-                    <thead className="bg-gray-100 text-left text-sm">
-                        <tr>
-                            <th className="px-4 py-2">Tên</th>
-                            <th className="px-4 py-2">Email</th>
-                            <th className="px-4 py-2">Quyền</th>
-                            <th className="px-4 py-2">Trạng thái</th>
-                            <th className="px-4 py-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((u) => (
-                            <tr key={u.id} className="border-t text-sm">
-                                <td className="px-4 py-2">{u.name}</td>
-                                <td className="px-4 py-2">{u.email}</td>
-                                <td className="px-4 py-2">{u.role}</td>
-                                <td className="px-4 py-2">
-                                    {u.isBanned ? (
-                                        <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700">Đã khoá</span>
-                                    ) : (
-                                        <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">Hoạt động</span>
-                                    )}
-                                </td>
-                                <td className="px-4 py-2 text-right space-x-3">
-                                    <button onClick={() => changeRole(u)} className="text-brand hover:underline">
-                                        Đổi quyền
-                                    </button>
-                                    <button onClick={() => toggleBan(u)} className="text-yellow-700 hover:underline">
-                                        {u.isBanned ? 'Mở khoá' : 'Khoá'}
-                                    </button>
-                                    <button onClick={() => removeUser(u)} className="text-red-600 hover:underline">
-                                        Xoá
-                                    </button>
-                                </td>
+                <div className="card overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-brand-50 text-left text-sm text-gray-600">
+                            <tr>
+                                <th className="px-5 py-3 font-semibold">Tên</th>
+                                <th className="px-5 py-3 font-semibold">Email</th>
+                                <th className="px-5 py-3 font-semibold">Quyền</th>
+                                <th className="px-5 py-3 font-semibold">Trạng thái</th>
+                                <th className="px-5 py-3"></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {users.map((u) => (
+                                <tr key={u.id} className="border-t border-gray-100 text-sm hover:bg-brand-50/40 transition-colors">
+                                    <td className="px-5 py-3 font-medium">{u.name}</td>
+                                    <td className="px-5 py-3 text-gray-500">{u.email}</td>
+                                    <td className="px-5 py-3">
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${u.role === 'ADMIN' ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-600'}`}>
+                                            {u.role}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-3">
+                                        {u.isBanned ? (
+                                            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Đã khoá</span>
+                                        ) : (
+                                            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Hoạt động</span>
+                                        )}
+                                    </td>
+                                    <td className="px-5 py-3 text-right space-x-3">
+                                        <button onClick={() => changeRole(u)} className="text-brand-600 hover:underline font-medium">
+                                            Đổi quyền
+                                        </button>
+                                        <button onClick={() => toggleBan(u)} className="text-amber-600 hover:underline font-medium">
+                                            {u.isBanned ? 'Mở khoá' : 'Khoá'}
+                                        </button>
+                                        <button onClick={() => removeUser(u)} className="text-red-600 hover:underline font-medium">
+                                            Xoá
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

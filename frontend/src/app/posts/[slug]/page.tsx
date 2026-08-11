@@ -62,31 +62,33 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
   if (!post) notFound();
 
   return (
-    <article>
-      <div className="flex gap-2 mb-3">
+    <article className="card p-8 md:p-12">
+      <div className="flex gap-2 mb-4 flex-wrap">
         {post.tags.map((t) => (
-          <span key={t.id} className="text-xs bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+          <span key={t.id} className="badge-gradient">
             {t.name}
           </span>
         ))}
       </div>
 
-      <h1 className="text-3xl font-bold">{post.title}</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">{post.title}</h1>
 
-      <div className="mt-2 text-sm text-gray-500">
-        {post.author.name} · {new Date(post.publishedAt).toLocaleDateString('vi-VN')}
+      <div className="mt-3 text-sm text-gray-400 flex items-center gap-2">
+        <span className="font-medium text-gray-600">{post.author.name}</span>
+        <span>·</span>
+        <span>{new Date(post.publishedAt).toLocaleDateString('vi-VN')}</span>
       </div>
 
       {post.coverImage && (
-        <img src={post.coverImage} alt={post.title} className="w-full rounded-lg mt-6 mb-6" />
+        <img src={post.coverImage} alt={post.title} className="w-full rounded-xl2 mt-8 mb-8" />
       )}
 
       <div
-        className="prose max-w-none mt-6"
+        className="prose max-w-none mt-6 prose-headings:font-bold prose-a:text-brand-600"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 
-      <div className="mt-8 border-t pt-6">
+      <div className="mt-10 border-t border-gray-100 pt-8">
         <ReactionBar postId={post.id} />
       </div>
 

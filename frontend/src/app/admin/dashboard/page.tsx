@@ -37,18 +37,17 @@ function DashboardContent() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Quản trị bài viết</h1>
-        <div className="flex items-center gap-3">
-          <Link href="/admin/users" className="text-sm text-brand hover:underline">Người dùng</Link>
-          <Link href="/admin/comments" className="text-sm text-brand hover:underline">Bình luận</Link>
-          <Link href="/admin/tags" className="text-sm text-brand hover:underline">Thẻ</Link>
-          <Link href="/admin/stats" className="text-sm text-brand hover:underline">Thống kê</Link>
-          <Link href="/admin/posts/new" className="bg-brand text-white px-4 py-2 rounded hover:bg-brand-dark">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <h1 className="text-2xl font-bold heading-gradient inline-block">Quản trị bài viết</h1>
+        <div className="flex items-center gap-2 flex-wrap text-sm">
+          <Link href="/admin/users" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Người dùng</Link>
+          <Link href="/admin/comments" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Bình luận</Link>
+          <Link href="/admin/tags" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Thẻ</Link>
+          <Link href="/admin/stats" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Thống kê</Link>
+          <Link href="/admin/posts/new" className="btn-primary text-sm">
             + Viết bài mới
           </Link>
         </div>
-
       </div>
 
       {loading ? (
@@ -56,42 +55,44 @@ function DashboardContent() {
       ) : posts.length === 0 ? (
         <p className="text-gray-400">Chưa có bài viết nào.</p>
       ) : (
-        <table className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
-          <thead className="bg-gray-100 text-left text-sm">
-            <tr>
-              <th className="px-4 py-2">Tiêu đề</th>
-              <th className="px-4 py-2">Trạng thái</th>
-              <th className="px-4 py-2">Bình luận</th>
-              <th className="px-4 py-2">Cập nhật</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((p) => (
-              <tr key={p.id} className="border-t text-sm">
-                <td className="px-4 py-2">{p.title}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${p.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}
-                  >
-                    {p.status === 'PUBLISHED' ? 'Đã đăng' : 'Nháp'}
-                  </span>
-                </td>
-                <td className="px-4 py-2">{p._count.comments}</td>
-                <td className="px-4 py-2">{new Date(p.updatedAt).toLocaleDateString('vi-VN')}</td>
-                <td className="px-4 py-2 text-right space-x-3">
-                  <Link href={`/admin/posts/${p.id}/edit`} className="text-brand hover:underline">
-                    Sửa
-                  </Link>
-                  <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">
-                    Xoá
-                  </button>
-                </td>
+        <div className="card overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-brand-50 text-left text-sm text-gray-600">
+              <tr>
+                <th className="px-5 py-3 font-semibold">Tiêu đề</th>
+                <th className="px-5 py-3 font-semibold">Trạng thái</th>
+                <th className="px-5 py-3 font-semibold">Bình luận</th>
+                <th className="px-5 py-3 font-semibold">Cập nhật</th>
+                <th className="px-5 py-3"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {posts.map((p) => (
+                <tr key={p.id} className="border-t border-gray-100 text-sm hover:bg-brand-50/40 transition-colors">
+                  <td className="px-5 py-3 font-medium">{p.title}</td>
+                  <td className="px-5 py-3">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        }`}
+                    >
+                      {p.status === 'PUBLISHED' ? 'Đã đăng' : 'Nháp'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-gray-500">{p._count.comments}</td>
+                  <td className="px-5 py-3 text-gray-500">{new Date(p.updatedAt).toLocaleDateString('vi-VN')}</td>
+                  <td className="px-5 py-3 text-right space-x-3">
+                    <Link href={`/admin/posts/${p.id}/edit`} className="text-brand-600 hover:underline font-medium">
+                      Sửa
+                    </Link>
+                    <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline font-medium">
+                      Xoá
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

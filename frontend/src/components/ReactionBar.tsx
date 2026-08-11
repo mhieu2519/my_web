@@ -58,11 +58,10 @@ export default function ReactionBar({ postId }: { postId: string }) {
           onClick={() => handleClick(type)}
           disabled={!user}
           title={user ? '' : 'Đăng nhập để thả cảm xúc'}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm transition ${
-            summary.myReaction === type
-              ? 'bg-brand/10 border-brand text-brand'
-              : 'bg-white border-gray-200 hover:border-gray-300'
-          } disabled:cursor-not-allowed disabled:opacity-60`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${summary.myReaction === type
+              ? 'bg-brand-gradient text-white border-transparent shadow-card'
+              : 'bg-white border-gray-200 hover:border-brand-300'
+            } disabled:cursor-not-allowed disabled:opacity-60`}
         >
           <span>{icon}</span>
           {summary.counts[type] ? <span>{summary.counts[type]}</span> : null}

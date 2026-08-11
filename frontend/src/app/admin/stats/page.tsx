@@ -18,11 +18,14 @@ type Overview = {
 
 type TimeseriesPoint = { date: string; posts: number; comments: number };
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, icon }: { label: string; value: number; icon: string }) {
     return (
-        <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="text-sm text-gray-500">{label}</div>
-            <div className="text-2xl font-bold mt-1">{value}</div>
+        <div className="card p-5">
+            <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">{label}</div>
+                <span className="text-lg">{icon}</span>
+            </div>
+            <div className="text-3xl font-extrabold mt-2 heading-gradient inline-block">{value}</div>
         </div>
     );
 }
@@ -46,27 +49,27 @@ function Content() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Thống kê tổng quan</h1>
+            <h1 className="text-2xl font-bold mb-8 heading-gradient inline-block">Thống kê tổng quan</h1>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <StatCard label="Tổng bài viết" value={overview.totalPosts} />
-                <StatCard label="Đã đăng" value={overview.publishedPosts} />
-                <StatCard label="Nháp" value={overview.draftPosts} />
-                <StatCard label="Bình luận" value={overview.totalComments} />
-                <StatCard label="Cảm xúc" value={overview.totalReactions} />
-                <StatCard label="Người dùng" value={overview.totalUsers} />
+                <StatCard label="Tổng bài viết" value={overview.totalPosts} icon="📝" />
+                <StatCard label="Đã đăng" value={overview.publishedPosts} icon="✅" />
+                <StatCard label="Nháp" value={overview.draftPosts} icon="📄" />
+                <StatCard label="Bình luận" value={overview.totalComments} icon="💬" />
+                <StatCard label="Cảm xúc" value={overview.totalReactions} icon="✨" />
+                <StatCard label="Người dùng" value={overview.totalUsers} icon="👥" />
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-4">
-                <h2 className="font-semibold mb-4">30 ngày gần nhất</h2>
+            <div className="card p-6">
+                <h2 className="font-bold mb-5">30 ngày gần nhất</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={series}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="posts" stroke="#4f46e5" name="Bài viết" />
-                        <Line type="monotone" dataKey="comments" stroke="#16a34a" name="Bình luận" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f2f0ff" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                        <YAxis allowDecimals={false} stroke="#9ca3af" />
+                        <Tooltip contentStyle={{ borderRadius: 12, border: '2px solid #e6e1ff' }} />
+                        <Line type="monotone" dataKey="posts" stroke="#7c3aed" strokeWidth={2.5} name="Bài viết" dot={false} />
+                        <Line type="monotone" dataKey="comments" stroke="#ec4899" strokeWidth={2.5} name="Bình luận" dot={false} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

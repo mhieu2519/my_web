@@ -24,7 +24,7 @@ export default function EditPostPage() {
 
   return (
     <AdminGuard>
-      <h1 className="text-2xl font-bold mb-6">Sửa bài viết</h1>
+      <h1 className="text-2xl font-bold mb-6 heading-gradient inline-block">Sửa bài viết</h1>
       {loading ? (
         <p className="text-gray-400">Đang tải...</p>
       ) : !post ? (

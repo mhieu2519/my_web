@@ -43,7 +43,7 @@ export default function PostEditor({
 
   return (
     <div>
-      <div className="flex items-center gap-1 border rounded-t-md p-2 bg-gray-50 flex-wrap">
+      <div className="flex items-center gap-1 border-2 border-gray-200 rounded-t-xl p-2 bg-brand-50/50 flex-wrap">
         <ToolbarBtn active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
           B
         </ToolbarBtn>
@@ -102,7 +102,8 @@ function ToolbarBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`text-sm px-2 py-1 rounded ${active ? 'bg-brand text-white' : 'hover:bg-gray-200'}`}
+      className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${active ? 'bg-brand-gradient text-white' : 'hover:bg-brand-100 text-gray-600'
+        }`}
     >
       {children}
     </button>

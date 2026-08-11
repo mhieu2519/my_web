@@ -51,58 +51,60 @@ function Content() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Quản lý thẻ</h1>
+            <h1 className="text-2xl font-bold mb-8 heading-gradient inline-block">Quản lý thẻ</h1>
             {loading ? (
                 <p className="text-gray-400">Đang tải...</p>
             ) : (
-                <table className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
-                    <thead className="bg-gray-100 text-left text-sm">
-                        <tr>
-                            <th className="px-4 py-2">Tên thẻ</th>
-                            <th className="px-4 py-2">Số bài viết</th>
-                            <th className="px-4 py-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tags.map((t) => (
-                            <tr key={t.id} className="border-t text-sm">
-                                <td className="px-4 py-2">
-                                    {editingId === t.id ? (
-                                        <input
-                                            value={editValue}
-                                            onChange={(e) => setEditValue(e.target.value)}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        t.name
-                                    )}
-                                </td>
-                                <td className="px-4 py-2">{t._count.posts}</td>
-                                <td className="px-4 py-2 text-right space-x-3">
-                                    {editingId === t.id ? (
-                                        <>
-                                            <button onClick={() => saveEdit(t.id)} className="text-brand hover:underline">
-                                                Lưu
-                                            </button>
-                                            <button onClick={() => setEditingId(null)} className="text-gray-500 hover:underline">
-                                                Huỷ
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button onClick={() => startEdit(t)} className="text-brand hover:underline">
-                                                Sửa
-                                            </button>
-                                            <button onClick={() => removeTag(t)} className="text-red-600 hover:underline">
-                                                Xoá
-                                            </button>
-                                        </>
-                                    )}
-                                </td>
+                <div className="card overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-brand-50 text-left text-sm text-gray-600">
+                            <tr>
+                                <th className="px-5 py-3 font-semibold">Tên thẻ</th>
+                                <th className="px-5 py-3 font-semibold">Số bài viết</th>
+                                <th className="px-5 py-3"></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {tags.map((t) => (
+                                <tr key={t.id} className="border-t border-gray-100 text-sm hover:bg-brand-50/40 transition-colors">
+                                    <td className="px-5 py-3">
+                                        {editingId === t.id ? (
+                                            <input
+                                                value={editValue}
+                                                onChange={(e) => setEditValue(e.target.value)}
+                                                className="border-2 border-brand-200 rounded-lg px-3 py-1 focus:border-brand-400 focus:outline-none"
+                                            />
+                                        ) : (
+                                            <span className="font-medium">{t.name}</span>
+                                        )}
+                                    </td>
+                                    <td className="px-5 py-3 text-gray-500">{t._count.posts}</td>
+                                    <td className="px-5 py-3 text-right space-x-3">
+                                        {editingId === t.id ? (
+                                            <>
+                                                <button onClick={() => saveEdit(t.id)} className="text-brand-600 hover:underline font-medium">
+                                                    Lưu
+                                                </button>
+                                                <button onClick={() => setEditingId(null)} className="text-gray-500 hover:underline">
+                                                    Huỷ
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => startEdit(t)} className="text-brand-600 hover:underline font-medium">
+                                                    Sửa
+                                                </button>
+                                                <button onClick={() => removeTag(t)} className="text-red-600 hover:underline font-medium">
+                                                    Xoá
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

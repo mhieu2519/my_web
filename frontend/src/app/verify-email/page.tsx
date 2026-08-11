@@ -28,12 +28,13 @@ export default function VerifyEmailPage() {
     }, [searchParams]);
 
     return (
-        <div className="text-center py-16">
+        <div className="max-w-sm mx-auto card p-10 text-center">
             {status === 'loading' && <p className="text-gray-400">Đang xác thực email...</p>}
             {status === 'success' && (
                 <>
-                    <p className="text-green-600 mb-4">Xác thực email thành công!</p>
-                    <Link href="/" className="text-brand hover:underline">
+                    <div className="text-4xl mb-3">🎉</div>
+                    <p className="text-green-600 font-medium mb-4">Xác thực email thành công!</p>
+                    <Link href="/" className="btn-primary inline-block">
                         Về trang chủ
                     </Link>
                 </>

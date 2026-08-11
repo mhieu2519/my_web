@@ -42,33 +42,33 @@ function CommentItem({
   }
 
   return (
-    <div className={depth > 0 ? 'ml-6 border-l pl-4 mt-3' : 'mt-4'}>
-      <div className="bg-white rounded-lg p-3 border">
+    <div className={depth > 0 ? 'ml-6 border-l-2 border-brand-100 pl-4 mt-3' : 'mt-4'}>
+      <div className="card p-4">
         <div className="flex items-center gap-2 text-sm">
-          <span className="font-medium">{comment.author.name}</span>
-          <span className="text-gray-400">{new Date(comment.createdAt).toLocaleString('vi-VN')}</span>
+          <span className="font-semibold text-gray-800">{comment.author.name}</span>
+          <span className="text-gray-400 text-xs">{new Date(comment.createdAt).toLocaleString('vi-VN')}</span>
         </div>
-        <p className="mt-1 text-gray-800 whitespace-pre-wrap">{comment.content}</p>
+        <p className="mt-1.5 text-gray-700 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
         {user && (
           <button
             onClick={() => setReplying((r) => !r)}
-            className="text-xs text-brand mt-1 hover:underline"
+            className="text-xs text-brand-600 mt-2 hover:underline font-medium"
           >
             Trả lời
           </button>
         )}
         {replying && (
-          <div className="mt-2 flex gap-2">
+          <div className="mt-3 flex gap-2">
             <input
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Viết phản hồi..."
-              className="flex-1 border rounded px-2 py-1 text-sm"
+              className="flex-1 border-2 border-gray-200 rounded-full px-4 py-1.5 text-sm focus:border-brand-400 focus:outline-none"
             />
             <button
               onClick={submitReply}
               disabled={submitting}
-              className="text-sm bg-brand text-white px-3 py-1 rounded disabled:opacity-50"
+              className="btn-primary !px-4 !py-1.5 text-sm"
             >
               Gửi
             </button>
@@ -113,27 +113,23 @@ export default function CommentSection({ postId }: { postId: string }) {
   }
 
   return (
-    <div className="mt-8">
-      <h3 className="text-lg font-semibold mb-3">Bình luận</h3>
+    <div className="mt-10">
+      <h3 className="text-xl font-bold mb-4">Bình luận</h3>
 
       {user ? (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-6">
           <input
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Viết bình luận của bạn..."
-            className="flex-1 border rounded px-3 py-2"
+            className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
           />
-          <button
-            onClick={submitComment}
-            disabled={submitting}
-            className="bg-brand text-white px-4 py-2 rounded disabled:opacity-50"
-          >
+          <button onClick={submitComment} disabled={submitting} className="btn-primary">
             Gửi
           </button>
         </div>
       ) : (
-        <p className="text-sm text-gray-500 mb-4">Đăng nhập để bình luận.</p>
+        <p className="text-sm text-gray-500 mb-6">Đăng nhập để bình luận.</p>
       )}
 
       {loading ? (

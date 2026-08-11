@@ -36,28 +36,28 @@ function Content() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Quản lý bình luận</h1>
+            <h1 className="text-2xl font-bold mb-8 heading-gradient inline-block">Quản lý bình luận</h1>
             {loading ? (
                 <p className="text-gray-400">Đang tải...</p>
             ) : comments.length === 0 ? (
                 <p className="text-gray-400">Chưa có bình luận nào.</p>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {comments.map((c) => (
-                        <div key={c.id} className="bg-white rounded-lg shadow-sm p-4">
-                            <div className="flex items-center justify-between text-sm text-gray-500 mb-1">
+                        <div key={c.id} className="card p-5">
+                            <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
                                 <span>
-                                    {c.author.name} · trong{' '}
-                                    <Link href={`/posts/${c.post.slug}`} className="text-brand hover:underline">
+                                    <span className="font-semibold text-gray-700">{c.author.name}</span> · trong{' '}
+                                    <Link href={`/posts/${c.post.slug}`} className="text-brand-600 hover:underline">
                                         {c.post.title}
                                     </Link>
                                 </span>
-                                <span>{new Date(c.createdAt).toLocaleString('vi-VN')}</span>
+                                <span className="text-xs">{new Date(c.createdAt).toLocaleString('vi-VN')}</span>
                             </div>
-                            <p className="text-gray-800 whitespace-pre-wrap">{c.content}</p>
+                            <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{c.content}</p>
                             <button
                                 onClick={() => removeComment(c.id)}
-                                className="text-red-600 text-sm hover:underline mt-2"
+                                className="text-red-600 text-sm hover:underline mt-3 font-medium"
                             >
                                 Xoá
                             </button>

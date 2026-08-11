@@ -14,8 +14,12 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     }
   }, [user, loading, router]);
 
-  if (loading) return <p className="text-gray-400">Đang kiểm tra quyền truy cập...</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="animate-spin h-8 w-8 rounded-full border-4 border-brand-200 border-t-brand-500" />
+    </div>
+  );
   if (!user || user.role !== 'ADMIN') return null;
 
-  return <>{children}</>;
+  return <div className="max-w-5xl mx-auto">{children}</div>;
 }
