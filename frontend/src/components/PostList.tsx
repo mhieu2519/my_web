@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { tagColor } from '@/lib/tagColors';
 
 export type PostSummary = {
     id: string;
@@ -22,41 +23,47 @@ export default function PostList({ posts }: { posts: PostSummary[] }) {
     }
 
     return (
-        <div className="space-y-10">
-            {posts.map((post) => (
-                <article key={post.id} className="card overflow-hidden group">
-                    {post.coverImage && (
-                        <div className="overflow-hidden">
-                            <img
-                                src={post.coverImage}
-                                alt={post.title}
-                                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
+        <div className="grid sm:grid-cols-2 gap-6">
+            {posts.map((post) => {
+                const primaryTag = post.tags[0];
+                const color = primaryTag ? tagColor(primaryTag.name) : null;
+                return (
+                    <article key={post.id} className="card overflow-hidden group flex flex-col">
+                        {post.coverImage && (
+                            <div className="overflow-hidden relative">
+                                <img
+                                    src={post.coverImage}
+                                    alt={post.title}
+                                    className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                {color && (
+                                    <span className={`absolute top-3 left-3 text-xs font-semibold px-3 py-1 rounded-full ${color.bg} ${color.text}`}>
+                                        {primaryTag!.name}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        <div className="p-5 flex flex-col flex-1">
+                            <Link href={`/posts/${post.slug}`}>
+                                <h2 className="font-display text-lg font-bold leading-snug hover:text-brand-600 transition-colors line-clamp-2">
+                                    {post.title}
+                                </h2>
+                            </Link>
+                            {post.excerpt && (
+                                <p className="text-gray-500 mt-2 text-sm leading-relaxed line-clamp-2">{post.excerpt}</p>
+                            )}
+                            <div className="mt-auto pt-4 flex items-center gap-3 text-xs text-gray-400">
+                                <span className="font-medium text-gray-600">{post.author.name}</span>
+                                <span>{new Date(post.publishedAt).toLocaleDateString('vi-VN')}</span>
+                                <span className="ml-auto flex items-center gap-2">
+                                    <span>💬 {post._count.comments}</span>
+                                    <span>✨ {post._count.reactions}</span>
+                                </span>
+                            </div>
                         </div>
-                    )}
-                    <div className="p-6">
-                        <div className="flex gap-2 mb-3 flex-wrap">
-                            {post.tags.map((t) => (
-                                <Link key={t.id} href={`/tags/${t.slug}`} className="badge-gradient hover:opacity-90">
-                                    {t.name}
-                                </Link>
-                            ))}
-                        </div>
-                        <Link href={`/posts/${post.slug}`}>
-                            <h2 className="text-2xl font-bold hover:heading-gradient transition-colors">
-                                {post.title}
-                            </h2>
-                        </Link>
-                        {post.excerpt && <p className="text-gray-600 mt-3 leading-relaxed">{post.excerpt}</p>}
-                        <div className="mt-5 pt-4 border-t border-gray-100 text-sm text-gray-400 flex items-center gap-4">
-                            <span className="font-medium text-gray-600">{post.author.name}</span>
-                            <span>{new Date(post.publishedAt).toLocaleDateString('vi-VN')}</span>
-                            <span>💬 {post._count.comments}</span>
-                            <span>✨ {post._count.reactions}</span>
-                        </div>
-                    </div>
-                </article>
-            ))}
+                    </article>
+                );
+            })}
         </div>
     );
 }

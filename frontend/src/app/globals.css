@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gradient-to-b from-brand-50 via-white to-white text-gray-900;
+  @apply bg-cream text-gray-900;
 }
 
 .prose img {
@@ -16,7 +16,7 @@ body {
   }
 
   .btn-outline {
-    @apply border-2 border-brand-200 text-brand-600 font-medium rounded-full px-5 py-2.5 hover:border-brand-400 hover:bg-brand-50 transition-all duration-200;
+    @apply border-2 border-brand-200 text-brand-700 font-medium rounded-full px-5 py-2.5 hover:border-brand-400 hover:bg-brand-50 transition-all duration-200;
   }
 
   .card {
@@ -28,10 +28,10 @@ body {
   }
 
   .heading-gradient {
-    @apply bg-brand-gradient bg-clip-text text-transparent;
+    @apply font-display font-bold bg-brand-gradient bg-clip-text text-transparent;
   }
 
   .ProseMirror {
-    @apply prose max-w-none min-h-[300px] border-2 border-t-0 border-gray-200 rounded-b-xl px-5 py-4 focus:outline-none;
+    @apply prose max-w-none min-h-[300px] border-2 border-t-0 border-brand-100 rounded-b-xl px-5 py-4 focus:outline-none;
   }
 }

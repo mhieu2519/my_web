@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { slugify } from '@/lib/slugify';
 import {
   IoLogOutOutline,
   IoCreateOutline,
@@ -16,8 +18,17 @@ import { IoMdLogIn } from 'react-icons/io';
 import { AiOutlineTags } from 'react-icons/ai';
 import { FcSearch } from "react-icons/fc";
 
+const NAV_LINKS = [
+  { label: 'Trang chủ', href: '/' },
+  { label: 'Công nghệ', href: `/tags/${slugify('Công nghệ')}` },
+  { label: 'Thơ ca', href: `/tags/${slugify('Thơ ca')}` },
+  { label: 'Du lịch', href: `/tags/${slugify('Du lịch')}` },
+  { label: 'Đời sống', href: `/tags/${slugify('Đời sống')}` },
+];
+
 export default function Header() {
   const { user, loading, logout } = useAuth();
+  const pathname = usePathname();
 
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -38,21 +49,40 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-brand-100">
-      <div className="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/85 border-b border-brand-100">
+      <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
 
         {/* LOGO BÊN TRÁI */}
-        <Link href="/" className="flex items-center gap-2 font-script text-2xl heading-gradient tracking-tight">
-          <img src="/logo.png" alt="logo" className="w-10 h-10 object-contain" />
-          <span>Lặng 24</span>
+        <Link href="/" className="flex items-center gap-2 shrink-0 font-display text-xl font-bold text-gray-900 tracking-tight">
+          <img src="/logo.png" alt="logo" className="w-9 h-9 object-contain" />
+          <span>
+            Lặng<span className="font-script text-2xl text-brand-600 ml-0.5">24</span>
+          </span>
         </Link>
 
+        {/* NAV Ở GIỮA */}
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {NAV_LINKS.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`pb-1 border-b-2 transition-colors ${active ? 'border-brand-500 text-brand-700' : 'border-transparent text-gray-500 hover:text-brand-600'
+                  }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* CÁC CÔNG CỤ BÊN PHẢI */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
 
           {/* Nút tìm kiếm */}
           <button
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+            className="p-2 rounded-full hover:bg-brand-50 transition-colors flex items-center justify-center"
             aria-label="Tìm kiếm"
           >
             <FcSearch size={22} />
@@ -62,14 +92,14 @@ export default function Header() {
           <div className="relative" ref={smallMenuRef}>
             <button
               onClick={() => setOpenSmallMenu(!openSmallMenu)}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors flex items-center justify-center"
+              className="p-2 rounded-full hover:bg-brand-50 text-gray-600 transition-colors flex items-center justify-center md:hidden"
               aria-label="Menu"
             >
               <FiMenu size={20} />
             </button>
 
             {openSmallMenu && (
-              <div className="absolute right-0 mt-2 w-52 card p-1.5 z-50 bg-white shadow-lg rounded-xl border border-gray-100">
+              <div className="absolute right-0 mt-2 w-52 card p-1.5 z-50 bg-white shadow-lg rounded-xl border border-brand-100">
                 <Link
                   href="/"
                   onClick={() => setOpenSmallMenu(false)}
@@ -86,7 +116,7 @@ export default function Header() {
                   <FcAbout />
                   Giới thiệu
                 </Link>
-                <div className="h-px bg-gray-100 my-1" />
+                <div className="h-px bg-brand-100 my-1" />
                 <Link
                   href="/terms"
                   onClick={() => setOpenSmallMenu(false)}
@@ -140,7 +170,7 @@ export default function Header() {
               </button>
 
               {openMenu && (
-                <div className="absolute right-0 mt-2 w-56 card p-1.5 z-50 bg-white shadow-lg rounded-xl border border-gray-100">
+                <div className="absolute right-0 mt-2 w-56 card p-1.5 z-50 bg-white shadow-lg rounded-xl border border-brand-100">
                   <Link
                     href="/profile"
                     onClick={() => setOpenMenu(false)}
@@ -171,7 +201,7 @@ export default function Header() {
                     </>
                   )}
 
-                  <div className="h-px bg-gray-100 my-1.5" />
+                  <div className="h-px bg-brand-100 my-1.5" />
 
                   <button
                     onClick={() => {
@@ -189,7 +219,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-gradient text-white text-sm font-medium hover:opacity-90 transition-opacity"
             >
               <IoMdLogIn size={18} />
               <span className="hidden sm:inline">Đăng nhập</span>

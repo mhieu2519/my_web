@@ -6,38 +6,44 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: '#f2f0ff',
-          100: '#e6e1ff',
-          200: '#cabeff',
-          300: '#a891ff',
-          400: '#8a63f9',
-          500: '#7c3aed', // primary
-          600: '#6d28d9',
-          700: '#5b21b6',
-          800: '#4c1d95',
-          900: '#3b1878',
-          DEFAULT: '#7c3aed',
-          dark: '#5b21b6',
+          50: '#F1F6EC',
+          100: '#DEEAD1',
+          200: '#BFD6A8',
+          300: '#9CBD7D',
+          400: '#74A052',
+          500: '#4B7A3A', // primary
+          600: '#3A6330',
+          700: '#2C4E27',
+          800: '#1F3A1C',
+          900: '#142612',
+          DEFAULT: '#3A6330',
+          dark: '#2C4E27',
+        },
+        cream: {
+          DEFAULT: '#FAF7EE',
+          100: '#F4EFDE',
+          200: '#ECE4CC',
         },
         accent: {
-          DEFAULT: '#ec4899', // hồng cho gradient
-          light: '#f472b6',
+          DEFAULT: '#D98C4A', // đất nung, dùng nhấn nhá (sticker, highlight)
+          light: '#F2B375',
         },
       },
       fontFamily: {
         sans: ['var(--font-sora)', 'ui-sans-serif', 'system-ui'],
-        script: ['var(--font-dancing)', 'cursive'], // nếu muốn dùng Dancing Script ở đâu đó, ví dụ logo
+        script: ['var(--font-dancing)', 'cursive'],
+        display: ['var(--font-display)', 'serif'], // tiêu đề kiểu editorial
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
-        'brand-gradient-soft': 'linear-gradient(135deg, #f2f0ff 0%, #fce7f3 100%)',
+        'brand-gradient': 'linear-gradient(135deg, #4B7A3A 0%, #2C4E27 100%)',
+        'brand-gradient-soft': 'linear-gradient(135deg, #F1F6EC 0%, #FAF7EE 100%)',
       },
       boxShadow: {
-        card: '0 4px 20px -4px rgba(124,58,237,0.15)',
-        'card-hover': '0 12px 32px -8px rgba(124,58,237,0.28)',
+        card: '0 8px 24px -8px rgba(44,78,39,0.18)',
+        'card-hover': '0 16px 36px -10px rgba(44,78,39,0.28)',
       },
       borderRadius: {
-        xl2: '1.25rem',
+        xl2: '1.5rem',
       },
     },
   },

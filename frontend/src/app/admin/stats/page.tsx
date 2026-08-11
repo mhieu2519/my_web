@@ -64,12 +64,12 @@ function Content() {
                 <h2 className="font-bold mb-5">30 ngày gần nhất</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={series}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f2f0ff" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F1F6EC" />
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" />
                         <YAxis allowDecimals={false} stroke="#9ca3af" />
-                        <Tooltip contentStyle={{ borderRadius: 12, border: '2px solid #e6e1ff' }} />
-                        <Line type="monotone" dataKey="posts" stroke="#7c3aed" strokeWidth={2.5} name="Bài viết" dot={false} />
-                        <Line type="monotone" dataKey="comments" stroke="#ec4899" strokeWidth={2.5} name="Bình luận" dot={false} />
+                        <Tooltip contentStyle={{ borderRadius: 12, border: '2px solid #DEEAD1' }} />
+                        <Line type="monotone" dataKey="posts" stroke="#3A6330" strokeWidth={2.5} name="Bài viết" dot={false} />
+                        <Line type="monotone" dataKey="comments" stroke="#D98C4A" strokeWidth={2.5} name="Bình luận" dot={false} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>
