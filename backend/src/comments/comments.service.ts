@@ -30,7 +30,9 @@ export class CommentsService {
   async create(userId: string, dto: CreateCommentDto) {
     const post = await this.prisma.post.findUnique({ where: { id: dto.postId } });
     if (!post) throw new NotFoundException('Không tìm thấy bài viết');
-
+    if (post.commentsEnabled === false) {
+      throw new ForbiddenException('Bài viết này đã tắt bình luận');
+    }
     if (dto.parentId) {
       const parent = await this.prisma.comment.findUnique({ where: { id: dto.parentId } });
       if (!parent || parent.postId !== dto.postId) {

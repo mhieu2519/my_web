@@ -27,17 +27,25 @@ enum ReactionType {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String  @id @default(cuid())
+  email         String  @unique
   passwordHash  String?
-  googleId      String?  @unique
-  emailVerified Boolean  @default(false)
-  isBanned      Boolean  @default(false)
+  googleId      String? @unique
+  githubId      String? @unique
+  emailVerified Boolean @default(false)
+  isBanned      Boolean @default(false)
   name          String
   avatarUrl     String?
-  role          Role     @default(USER)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  bio           String?
+  location      String?
+  websiteUrl    String?
+  facebookUrl   String?
+  instagramUrl  String?
+  githubUrl     String?
+
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   posts              Post[]
   comments           Comment[]
@@ -45,6 +53,9 @@ model User {
   refreshTokens      RefreshToken[]
   passwordResets     PasswordResetToken[]
   emailVerifications EmailVerificationToken[]
+  bookmarks          Bookmark[]
+  following          Follow[]                 @relation("Follower")
+  followers          Follow[]                 @relation("Following")
 }
 
 model PasswordResetToken {
@@ -83,22 +94,27 @@ model RefreshToken {
 }
 
 model Post {
-  id          String     @id @default(cuid())
-  slug        String     @unique
-  title       String
-  excerpt     String?
-  content     String     @db.Text
-  coverImage  String?
-  status      PostStatus @default(DRAFT)
-  authorId    String
-  author      User       @relation(fields: [authorId], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  publishedAt DateTime?
+  id              String     @id @default(cuid())
+  slug            String     @unique
+  title           String
+  excerpt         String?
+  content         String     @db.Text
+  coverImage      String?
+  status          PostStatus @default(DRAFT)
+  views           Int        @default(0)
+  isFeatured      Boolean    @default(false)
+  commentsEnabled Boolean    @default(true)
+  authorId        String
+  author          User       @relation(fields: [authorId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  publishedAt     DateTime?
 
   tags      Tag[]      @relation("PostToTag")
   comments  Comment[]
   reactions Reaction[]
+
+  bookmarks Bookmark[]
 
   @@index([status, publishedAt])
 }
@@ -126,6 +142,30 @@ model Comment {
   @@index([postId])
 }
 
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
 model Reaction {
   id        String       @id @default(cuid())
   type      ReactionType
@@ -137,4 +177,10 @@ model Reaction {
 
   @@unique([postId, userId])
   @@index([postId])
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
 }

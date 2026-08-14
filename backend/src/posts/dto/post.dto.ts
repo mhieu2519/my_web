@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsIn, MaxLength, IsArray, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsIn, MaxLength, IsArray, MinLength, IsBoolean } from 'class-validator';
 
 export class CreatePostDto {
   @IsString() @MinLength(3) @MaxLength(200)
@@ -18,6 +18,15 @@ export class CreatePostDto {
 
   @IsOptional() @IsArray()
   tags?: string[];
+
+  @IsOptional() @IsString() @MaxLength(200)
+  slug?: string;
+
+  @IsOptional() @IsBoolean()
+  isFeatured?: boolean;
+
+  @IsOptional() @IsBoolean()
+  commentsEnabled?: boolean;
 }
 
 export class UpdatePostDto {
@@ -38,4 +47,13 @@ export class UpdatePostDto {
 
   @IsOptional() @IsArray()
   tags?: string[];
+
+  @IsOptional() @IsString() @MaxLength(200)
+  slug?: string;
+
+  @IsOptional() @IsBoolean()
+  isFeatured?: boolean;
+
+  @IsOptional() @IsBoolean()
+  commentsEnabled?: boolean;
 }

@@ -10,6 +10,12 @@ type User = {
   role: 'ADMIN' | 'USER';
   avatarUrl?: string | null;
   emailVerified?: boolean;
+  bio?: string | null;
+  location?: string | null;
+  websiteUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  githubUrl?: string | null;
 };
 
 type AuthContextType = {

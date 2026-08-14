@@ -43,13 +43,26 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Passport tự redirect sang Google
-  }
+  async googleAuth() { }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: any, @Res() res: Response) {
+    const user = req.user;
+    const { accessToken, refreshToken } = await this.authService.issueTokensForUser(
+      user.id, user.email, user.role,
+    );
+    res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions);
+    res.redirect(`${this.config.get('FRONTEND_URL')}/auth/callback?accessToken=${accessToken}`);
+  }
+
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  async githubAuth() { }
+
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  async githubCallback(@Req() req: any, @Res() res: Response) {
     const user = req.user;
     const { accessToken, refreshToken } = await this.authService.issueTokensForUser(
       user.id, user.email, user.role,
@@ -82,6 +95,7 @@ export class AuthController {
       select: {
         id: true, email: true, name: true, role: true, avatarUrl: true,
         emailVerified: true, createdAt: true,
+        bio: true, location: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, githubUrl: true,
       },
     });
   }

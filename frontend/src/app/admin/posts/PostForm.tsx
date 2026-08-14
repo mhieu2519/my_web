@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api-client';
 import { uploadToCloudinary } from '@/lib/upload';
 import PostEditor from '@/components/PostEditor';
+import { slugify } from '@/lib/slugify';
+
+type TagRow = { id: string; name: string; slug: string };
 
 type InitialData = {
   id?: string;
@@ -13,8 +16,13 @@ type InitialData = {
   content?: string;
   coverImage?: string;
   status?: 'DRAFT' | 'PUBLISHED';
+  slug?: string;
+  isFeatured?: boolean;
+  commentsEnabled?: boolean;
   tags?: { name: string }[];
 };
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 export default function PostForm({ initial }: { initial?: InitialData }) {
   const router = useRouter();
@@ -22,15 +30,72 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   const [excerpt, setExcerpt] = useState(initial?.excerpt || '');
   const [content, setContent] = useState(initial?.content || '');
   const [coverImage, setCoverImage] = useState(initial?.coverImage || '');
-  const [tags, setTags] = useState((initial?.tags || []).map((t) => t.name).join(', '));
+  const [slugValue, setSlugValue] = useState(initial?.slug || '');
+  const [editingSlug, setEditingSlug] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(initial?.isFeatured ?? false);
+  const [commentsEnabled, setCommentsEnabled] = useState(initial?.commentsEnabled ?? true);
+  const [allTags, setAllTags] = useState<TagRow[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+    new Set((initial?.tags || []).map((t) => t.name)),
+  );
+  const [extraTagsInput, setExtraTagsInput] = useState('');
+  const [extraTags, setExtraTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+
+  useEffect(() => {
+    api.get('/tags').then((res) => setAllTags(res.data)).catch(() => { });
+  }, []);
+
+  // Autosave cục bộ (localStorage) — chỉ để tránh mất nội dung khi lỡ đóng tab, KHÔNG gửi lên backend
+  useEffect(() => {
+    const key = `post-draft:${initial?.id || 'new'}`;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(key, JSON.stringify({ title, excerpt, content, coverImage }));
+        setLastSavedAt(new Date());
+      } catch { }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [title, excerpt, content, coverImage, initial?.id]);
+
+  // Tự sinh đường dẫn theo tiêu đề, trừ khi người dùng đã tự chỉnh sửa hoặc bài đã có slug sẵn
+  useEffect(() => {
+    if (!editingSlug && !initial?.slug) {
+      setSlugValue(slugify(title));
+    }
+  }, [title, editingSlug, initial?.slug]);
 
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = await uploadToCloudinary(file, 'posts');
     setCoverImage(url);
+  }
+
+  //function handleCoverDrop(e: React.DragEvent<HTMLDivElement>) {
+  function handleCoverDrop(e: React.DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    uploadToCloudinary(file, 'posts').then(setCoverImage);
+  }
+
+  function addExtraTag() {
+    const v = extraTagsInput.trim();
+    if (!v) return;
+    if (!extraTags.includes(v)) setExtraTags((prev) => [...prev, v]);
+    setExtraTagsInput('');
+  }
+
+  function toggleCategory(name: string) {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
   }
 
   async function handleSubmit(status: 'DRAFT' | 'PUBLISHED') {
@@ -40,20 +105,25 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
       return;
     }
     setSubmitting(true);
-    const payload = {
+    const tags = Array.from(new Set([...Array.from(selectedCategories), ...extraTags]));
+    const payload: any = {
       title,
       excerpt: excerpt || undefined,
       content,
       coverImage: coverImage || undefined,
       status,
-      tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+      tags,
+      isFeatured,
+      commentsEnabled,
     };
+    if (editingSlug && slugValue.trim()) payload.slug = slugValue.trim();
     try {
       if (initial?.id) {
         await api.patch(`/posts/${initial.id}`, payload);
       } else {
         await api.post('/posts', payload);
       }
+      localStorage.removeItem(`post-draft:${initial?.id || 'new'}`);
       router.push('/admin/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
@@ -62,59 +132,188 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
     }
   }
 
+  const wordCount = content.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+
   return (
-    <div className="card p-8 space-y-5">
-      <div>
-        <label className="block text-sm font-medium mb-1.5 text-gray-700">Tiêu đề</label>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-medium focus:border-brand-400 focus:outline-none transition-colors"
-          placeholder="Tiêu đề bài viết"
-        />
+    <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+      <div className="space-y-5">
+        <div className="card p-5">
+          <div className="flex items-center justify-end mb-1">
+            <span className="text-xs text-gray-400">{title.length}/120</span>
+          </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value.slice(0, 120))}
+            placeholder="Nhập tiêu đề bài viết..."
+            className="w-full text-xl font-display font-bold border-none focus:outline-none placeholder:text-gray-300 dark:bg-transparent dark:text-white"
+          />
+          <div className="flex items-center gap-2 mt-2 text-xs text-gray-400 flex-wrap">
+            <span>Đường dẫn: {SITE_URL}/posts/</span>
+            {editingSlug ? (
+              <input
+                value={slugValue}
+                onChange={(e) => setSlugValue(slugify(e.target.value))}
+                onBlur={() => setEditingSlug(false)}
+                autoFocus
+                className="border border-brand-200 dark:border-brand-700 rounded px-2 py-0.5 text-xs dark:bg-brand-800"
+              />
+            ) : (
+              <span className="font-medium text-gray-600 dark:text-gray-300">{slugValue || '...'}</span>
+            )}
+            <button type="button" onClick={() => setEditingSlug(true)} className="text-brand-600 dark:text-brand-300 hover:underline">
+              ✎ Chỉnh sửa
+            </button>
+          </div>
+        </div>
+
+        <div className="card p-5">
+          <PostEditor content={content} onChange={setContent} />
+          <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
+            <span>Số từ: {wordCount}</span>
+            <span className="flex items-center gap-1.5">
+              {lastSavedAt && (
+                <>
+                  Đã lưu lúc {lastSavedAt.toLocaleTimeString('vi-VN')}
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Ảnh đại diện</h3>
+          {coverImage ? (
+            <div className="relative">
+              <img src={coverImage} alt="cover" className="w-full h-56 object-cover rounded-xl2" />
+              <div className="absolute bottom-3 left-3 flex gap-2">
+                <label className="bg-white/90 dark:bg-brand-900/80 text-xs font-medium px-3 py-1.5 rounded-full cursor-pointer hover:bg-white transition-colors">
+                  📷 Thay đổi ảnh
+                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setCoverImage('')}
+                  className="bg-white/90 dark:bg-brand-900/80 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                >
+                  🗑 Xoá
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label
+              onDrop={handleCoverDrop}
+              onDragOver={(e) => e.preventDefault()}
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-brand-700 rounded-xl2 py-10 cursor-pointer hover:border-brand-300 transition-colors"
+            >
+              <span className="text-3xl">🖼️</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Kéo &amp; thả ảnh vào đây</span>
+              <span className="text-xs text-brand-600 dark:text-brand-300 font-medium">hoặc chọn ảnh từ máy tính</span>
+              <span className="text-xs text-gray-400">Định dạng: JPG, PNG, WebP (Tối đa 5MB)</span>
+              <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
+            </label>
+          )}
+        </div>
+
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Thiết lập khác</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+              Cho phép bình luận
+              <input type="checkbox" checked={commentsEnabled} onChange={(e) => setCommentsEnabled(e.target.checked)} className="w-5 h-5 accent-brand-500" />
+            </label>
+            <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+              Đặt làm bài viết nổi bật
+              <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="w-5 h-5 accent-brand-500" />
+            </label>
+          </div>
+        </div>
+
+        {error && <p className="text-red-600 text-sm">{error}</p>}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1.5 text-gray-700">Mô tả ngắn (excerpt)</label>
-        <input
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
-          placeholder="Hiện ở trang danh sách bài viết"
-        />
+      <div className="space-y-5">
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Đăng bài</h3>
+          <div className="flex gap-2 mb-3">
+            <button onClick={() => handleSubmit('DRAFT')} disabled={submitting} className="btn-outline flex-1 text-sm">
+              Lưu nháp
+            </button>
+            <button type="button" onClick={() => setShowPreview(true)} className="btn-outline flex-1 text-sm">
+              👁 Xem trước
+            </button>
+          </div>
+          <button onClick={() => handleSubmit('PUBLISHED')} disabled={submitting} className="btn-primary w-full text-sm">
+            {submitting ? 'Đang xử lý...' : '📤 Đăng bài'}
+          </button>
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 space-y-1.5">
+            <p>Trạng thái: <span className="font-medium text-gray-700 dark:text-gray-200">{initial?.status === 'PUBLISHED' ? 'Đã đăng' : 'Nháp'}</span></p>
+            <p>Hiển thị: <span className="font-medium text-gray-700 dark:text-gray-200">Công khai</span></p>
+          </div>
+        </div>
+
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Chuyên mục</h3>
+          <div className="space-y-2">
+            {allTags.map((t) => (
+              <label key={t.id} className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                <input type="checkbox" checked={selectedCategories.has(t.name)} onChange={() => toggleCategory(t.name)} className="w-4 h-4 accent-brand-500" />
+                {t.name}
+              </label>
+            ))}
+            {allTags.length === 0 && <p className="text-xs text-gray-400">Chưa có chuyên mục nào.</p>}
+          </div>
+        </div>
+
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Thẻ (Tags)</h3>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {extraTags.map((t) => (
+              <span key={t} className="flex items-center gap-1 text-xs bg-brand-50 dark:bg-brand-800 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-full">
+                #{t}
+                <button type="button" onClick={() => setExtraTags((prev) => prev.filter((x) => x !== t))} className="hover:text-red-500">✕</button>
+              </span>
+            ))}
+          </div>
+          <input
+            value={extraTagsInput}
+            onChange={(e) => setExtraTagsInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addExtraTag();
+              }
+            }}
+            placeholder="Nhập thẻ và nhấn Enter..."
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+          />
+        </div>
+
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Tóm tắt bài viết</h3>
+            <span className="text-xs text-gray-400">{excerpt.length}/200</span>
+          </div>
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value.slice(0, 200))}
+            rows={4}
+            placeholder="Viết một đoạn tóm tắt ngắn gọn về bài viết..."
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none resize-none"
+          />
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-gray-700">Ảnh bìa</label>
-        <input type="file" accept="image/*" onChange={handleCoverUpload} className="text-sm" />
-        {coverImage && <img src={coverImage} alt="cover" className="mt-3 h-40 rounded-xl2 object-cover" />}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1.5 text-gray-700">Thẻ (phân cách bởi dấu phẩy)</label>
-        <input
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
-          placeholder="ví dụ: điện tử, firmware, DIY"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2 text-gray-700">Nội dung</label>
-        <PostEditor content={content} onChange={setContent} />
-      </div>
-
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-
-      <div className="flex gap-3 pt-2">
-        <button onClick={() => handleSubmit('DRAFT')} disabled={submitting} className="btn-outline">
-          Lưu nháp
-        </button>
-        <button onClick={() => handleSubmit('PUBLISHED')} disabled={submitting} className="btn-primary">
-          Đăng bài
-        </button>
-      </div>
+      {showPreview && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
+          <div className="bg-white dark:bg-brand-900 rounded-xl2 max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowPreview(false)} className="float-right text-gray-400 hover:text-gray-600">✕</button>
+            <h1 className="font-display text-2xl font-bold mb-4 dark:text-white">{title || 'Chưa có tiêu đề'}</h1>
+            {coverImage && <img src={coverImage} alt="" className="w-full rounded-xl2 mb-5" />}
+            <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

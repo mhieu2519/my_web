@@ -38,6 +38,9 @@ export default function EditPostPage() {
             excerpt: post.excerpt,
             coverImage: post.coverImage,
             status: post.status,
+            slug: post.slug,
+            isFeatured: post.isFeatured,
+            commentsEnabled: post.commentsEnabled,
             tags: post.tags,
           }}
         />

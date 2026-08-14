@@ -110,7 +110,28 @@ export class AuthService {
       },
     });
   }
+  async findOrCreateGithubUser(data: { githubId: string; email: string; name: string; avatarUrl?: string }) {
+    let user = await this.prisma.user.findUnique({ where: { githubId: data.githubId } });
+    if (user) return user;
 
+    user = await this.prisma.user.findUnique({ where: { email: data.email } });
+    if (user) {
+      return this.prisma.user.update({
+        where: { id: user.id },
+        data: { githubId: data.githubId, emailVerified: true },
+      });
+    }
+
+    return this.prisma.user.create({
+      data: {
+        githubId: data.githubId,
+        email: data.email,
+        name: data.name,
+        avatarUrl: data.avatarUrl,
+        emailVerified: true,
+      },
+    });
+  }
   async issueTokensForUser(userId: string, email: string, role: string) {
     return this.issueTokens(userId, email, role);
   }

@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   title: 'Lặng 24',
   description: 'Trang cá nhân — viết bài, chia sẻ ảnh, linh tinh',
   icons: {
-    icon: 'logo.png',
-    shortcut: 'logo.png',
-    apple: 'logo.png',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
 };
 
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${sora.variable} ${dancingScript.variable} ${fraunces.variable} antialiased flex flex-col min-h-screen`}>
         <AuthProvider>
           <Header />
-          <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-10">{children}</main>
+          <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-10">{children}</main>
           <Footer />
         </AuthProvider>
       </body>

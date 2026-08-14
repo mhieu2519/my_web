@@ -63,3 +63,6 @@ api.interceptors.response.use(
 export function getGoogleLoginUrl() {
   return `${API_URL}/auth/google`;
 }
+export function getGithubLoginUrl() {
+  return `${API_URL}/auth/github`;
+}

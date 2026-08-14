@@ -9,19 +9,39 @@ import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private postsService: PostsService) {}
+  constructor(private postsService: PostsService) { }
 
-  // Công khai: danh sách bài đã xuất bản
   @Get()
   findPublished(
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('tag') tag?: string,
+    @Query('search') search?: string,
+    @Query('sort') sort?: string,
+    @Query('range') range?: string,
+    @Query('authorId') authorId?: string,
   ) {
-    return this.postsService.findPublished(Number(page) || 1, Number(pageSize) || 10, tag);
+    return this.postsService.findPublished(
+      Number(page) || 1,
+      Number(pageSize) || 10,
+      tag,
+      search,
+      sort === 'popular' ? 'popular' : 'newest',
+      range,
+      authorId,
+    );
   }
 
-  // Admin/author: danh sách tất cả bài (kể cả draft)
+  @Get('popular')
+  popular(@Query('limit') limit?: string, @Query('tag') tag?: string) {
+    return this.postsService.findPopular(Number(limit) || 4, tag);
+  }
+
+  @Get('search-facets')
+  searchFacets(@Query('search') search?: string, @Query('range') range?: string) {
+    return this.postsService.searchFacets(search, range);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Get('admin/all')

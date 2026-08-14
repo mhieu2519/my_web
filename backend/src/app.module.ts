@@ -12,6 +12,8 @@ import { UploadModule } from './upload/upload.module';
 import { MailModule } from './mail/mail.module';
 import { TagsModule } from './tags/tags.module';
 import { StatsModule } from './stats/stats.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { StatsModule } from './stats/stats.module';
     MailModule,
     TagsModule,
     StatsModule,
+    NewsletterModule,
+    BookmarksModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
