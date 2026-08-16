@@ -121,19 +121,37 @@ export default async function PostsListPage({
             </div>
 
             <aside className="space-y-6">
-                <div className="card p-6">
-                    <h3 className="font-bold mb-2 text-gray-800 dark:text-gray-100">Về Lặng 24</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                <div className="card p-6 overflow-hidden">
+                    {/* 1. Tiêu đề (Nằm ở trên cùng) */}
+                    <h3 className="font-bold mb-4 text-gray-800 dark:text-gray-100">Về Lặng 24</h3>
+
+                    {/* 2. Ảnh (Nằm ở giữa, trải rộng full width thẻ cha) */}
+                    {/* Đặt ảnh vào một container riêng để dễ quản lý kích thước */}
+                    <div className="mb-6 -mx-6"> {/* Thêm margin âm -mx-6 để ảnh trải sát mép thẻ card (bù lại p-6) */}
+                        <Image
+                            src="/images/pic4.png"
+                            alt="Mountain Illustration"
+                            width={1000}
+                            height={400}
+                            priority
+                            className="w-full h-auto object-cover select-none" // object-cover để ảnh lấp đầy khung mà không bị méo
+                        />
+                    </div>
+
+                    {/* 3. Đoạn văn bản (Nằm phía dưới ảnh) */}
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl mb-6">
                         Lặng 24 là nơi mình viết lại những điều đẹp đẽ trong cuộc sống, những chuyến đi,
                         những vần thơ và cả những dòng code.
                     </p>
+
+                    {/* 4. Link/Nút (Nằm cuối cùng) */}
                     <Link
                         href="/about"
-                        className="group inline-flex items-center gap-1.5 text-sm text-brand-600 dark:text-brand-300 font-medium hover:text-brand-800 mt-3"
+                        className="group inline-flex items-center justify-center gap-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2.5 transition-all duration-200 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50/50 dark:hover:bg-brand-950/30 hover:shadow-sm"
                     >
                         <span>Tìm hiểu thêm</span>
                         <span
-                            className="transition-transform group-hover:translate-x-1.5 duration-200"
+                            className="transition-transform duration-200 group-hover:translate-x-1.5"
                             aria-hidden="true"
                         >
                             →

@@ -32,8 +32,8 @@ export default function PostEditor({
       try {
         const url = await uploadToCloudinary(file, 'posts');
         editor.chain().focus().setImage({ src: url }).run();
-      } catch (err) {
-        alert('Tải ảnh lên thất bại. Vui lòng thử lại.');
+      } catch (err: any) {
+        alert(err.message || 'Tải ảnh lên thất bại. Vui lòng thử lại.');
       }
     },
     [editor],

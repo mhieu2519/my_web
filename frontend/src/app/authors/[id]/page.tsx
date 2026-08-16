@@ -7,6 +7,7 @@ import PostList, { PostSummary } from '@/components/PostList';
 import Pagination from '@/components/Pagination';
 import { formatCount } from '@/lib/format';
 import { slugify } from '@/lib/slugify';
+import { cldOptimize } from '@/lib/cloudinary';
 
 const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const PLACEHOLDER_IMG = '/images/slide3.png';
@@ -111,7 +112,7 @@ export default async function AuthorPage({
                     <div className="-mt-12 md:-mt-14 flex flex-col md:flex-row md:items-end justify-between gap-5">
                         <div className="flex items-end gap-4">
                             <img
-                                src={profile.avatarUrl || PLACEHOLDER_IMG}
+                                src={cldOptimize(profile.avatarUrl || PLACEHOLDER_IMG, 'w_96,h_96,c_fill,g_auto')}
                                 alt={profile.name}
                                 className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover ring-4 ring-white dark:ring-brand-800 shadow-card shrink-0"
                             />

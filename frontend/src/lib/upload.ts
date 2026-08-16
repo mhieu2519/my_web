@@ -1,10 +1,17 @@
+// frontend/src/lib/upload.ts
 import { api } from './api-client';
 
-// Xin chữ ký từ backend, rồi upload thẳng file lên Cloudinary (không qua backend)
+const MAX_FILE_SIZE_MB = 5; // tuỳ chỉnh theo nhu cầu
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 export async function uploadToCloudinary(
   file: File,
   folder: 'posts' | 'avatars' = 'posts',
 ): Promise<string> {
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error(`Ảnh vượt quá ${MAX_FILE_SIZE_MB}MB. Vui lòng chọn ảnh nhỏ hơn.`);
+  }
+
   const { data } = await api.post('/upload/presign', { folder });
   const { signature, timestamp, apiKey, cloudName, folder: signedFolder } = data;
 

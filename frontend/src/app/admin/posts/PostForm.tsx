@@ -6,6 +6,7 @@ import { api } from '@/lib/api-client';
 import { uploadToCloudinary } from '@/lib/upload';
 import PostEditor from '@/components/PostEditor';
 import { slugify } from '@/lib/slugify';
+import { cldOptimize } from '@/lib/cloudinary';
 
 type TagRow = { id: string; name: string; slug: string };
 
@@ -71,18 +72,23 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = await uploadToCloudinary(file, 'posts');
-    setCoverImage(url);
+    try {
+      const url = await uploadToCloudinary(file, 'posts');
+      setCoverImage(url);
+    } catch (err: any) {
+      alert(err.message || 'Tải ảnh lên thất bại.');
+    }
   }
 
-  //function handleCoverDrop(e: React.DragEvent<HTMLDivElement>) {
+
   function handleCoverDrop(e: React.DragEvent<HTMLLabelElement>) {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-    uploadToCloudinary(file, 'posts').then(setCoverImage);
+    uploadToCloudinary(file, 'posts')
+      .then(setCoverImage)
+      .catch((err) => alert(err.message || 'Tải ảnh lên thất bại.'));
   }
-
   function addExtraTag() {
     const v = extraTagsInput.trim();
     if (!v) return;
@@ -185,7 +191,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Ảnh đại diện</h3>
           {coverImage ? (
             <div className="relative">
-              <img src={coverImage} alt="cover" className="w-full h-56 object-cover rounded-xl2" />
+              <img src={cldOptimize(coverImage, 'w_1000,h_400,c_fill')} alt="cover" className="w-full h-56 object-cover rounded-xl2" />
               <div className="absolute bottom-3 left-3 flex gap-2">
                 <label className="bg-white/90 dark:bg-brand-900/80 text-xs font-medium px-3 py-1.5 rounded-full cursor-pointer hover:bg-white transition-colors">
                   📷 Thay đổi ảnh
@@ -309,7 +315,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           <div className="bg-white dark:bg-brand-900 rounded-xl2 max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowPreview(false)} className="float-right text-gray-400 hover:text-gray-600">✕</button>
             <h1 className="font-display text-2xl font-bold mb-4 dark:text-white">{title || 'Chưa có tiêu đề'}</h1>
-            {coverImage && <img src={coverImage} alt="" className="w-full rounded-xl2 mb-5" />}
+            {coverImage && <img src={cldOptimize(coverImage, 'w_1000,h_400,c_fill')} alt="" className="w-full rounded-xl2 mb-5" />}
             <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
           </div>
         </div>

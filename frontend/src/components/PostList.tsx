@@ -8,6 +8,9 @@ import { api } from '@/lib/api-client';
 import { useAuth } from '@/hooks/useAuth';
 import BookmarkButton from './BookmarkButton';
 import { WiTime2 } from "react-icons/wi";
+import { cldOptimize } from '@/lib/cloudinary';
+import { FaRegComment } from "react-icons/fa6";
+import { FaRegHeart } from "react-icons/fa";
 
 export type PostSummary = {
     id: string;
@@ -100,7 +103,7 @@ export default function PostList({ posts, columns = 2 }: { posts: PostSummary[];
                             {post.coverImage && (
                                 <div className="overflow-hidden relative">
                                     <img
-                                        src={post.coverImage}
+                                        src={cldOptimize(post.coverImage, 'w_600')}
                                         alt={post.title}
                                         className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
@@ -124,7 +127,7 @@ export default function PostList({ posts, columns = 2 }: { posts: PostSummary[];
                                     {/* 1. Tác giả có Avatar tròn */}
                                     <div className="flex items-center gap-1.5 min-w-0">
                                         <img
-                                            src={authorAvatar || fallbackAvatar}
+                                            src={cldOptimize(authorAvatar || fallbackAvatar, 'w_64')}
                                             alt={post.author.name}
                                             className="w-5 h-5 rounded-full object-cover shrink-0 border border-gray-200 dark:border-gray-700"
                                         />
@@ -141,8 +144,8 @@ export default function PostList({ posts, columns = 2 }: { posts: PostSummary[];
 
                                     {/* 3. Lượt tương tác */}
                                     <span className="ml-auto flex items-center gap-2 shrink-0">
-                                        <span>💬 {post._count.comments}</span>
-                                        <span>✨ {post._count.reactions}</span>
+                                        <span className="flex items-center gap-0.5 shrink-0"><FaRegComment className="text-gray-400" /> {post._count.comments}</span>
+                                        <span className="flex items-center gap-0.5 shrink-0"><FaRegHeart className="text-gray-400" /> {post._count.reactions}</span>
                                     </span>
                                 </div>
                             </div>

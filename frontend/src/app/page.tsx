@@ -4,6 +4,7 @@ import PostList, { PostSummary } from '@/components/PostList';
 import Pagination from '@/components/Pagination';
 import CategoryCard from '@/components/CategoryCard';
 import NewsletterForm from '@/components/NewsletterForm';
+import PolaroidSlider from '@/components/PolaroidSlider';
 import { slugify } from '@/lib/slugify';
 import { formatCount } from '@/lib/format';
 import { TbLeaf } from "react-icons/tb";
@@ -20,7 +21,7 @@ import { TbPoint } from "react-icons/tb";
 
 const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const PAGE_SIZE = 8;
-const PLACEHOLDER_IMG = '/images/slide3.png';
+
 
 const TOPICS = [
   {
@@ -105,6 +106,15 @@ export default async function HomePage({
   ]);
 
   const featured = isFirstPage ? items[0] : undefined;
+  const PLACEHOLDER_IMG = '/images/slide3.png';
+
+  // Tạo mảng danh sách ảnh cho Hero Slider
+  const heroImages = [
+    featured?.coverImage || PLACEHOLDER_IMG,
+    '/images/slide1.png',
+    '/images/slide2.png',
+    '/images/slide3.png',
+  ];
 
   return (
     <div>
@@ -112,15 +122,9 @@ export default async function HomePage({
         <>
           {/* 1. Hero Section: Đặt Ảnh bên trái (order-2 md:order-1), Text bên phải (order-1 md:order-2) */}
           <section className="grid md:grid-cols-12 gap-8 items-center mb-12">
-            <div className="md:col-span-7 relative h-[360px] md:h-[420px] rounded-2xl overflow-hidden shadow-sm">
-              <Image
-                src={featured?.coverImage || PLACEHOLDER_IMG}
-                alt={featured?.title || 'Lặng 24'}
-                fill
-                sizes="(max-width: 768px) 100vw, 60vw"
-                className="object-cover"
-                priority
-              />
+
+            <div className="md:col-span-7">
+              <PolaroidSlider images={heroImages} interval={3500} />
             </div>
 
             <div className="md:col-span-5 flex flex-col justify-center pl-0 md:pl-2">

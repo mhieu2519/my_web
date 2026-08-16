@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api-client';
 import { uploadToCloudinary } from '@/lib/upload';
+import { cldOptimize } from '@/lib/cloudinary';
 
 export default function ProfilePage() {
     const { user, loading, refreshMe } = useAuth();
@@ -45,8 +46,12 @@ export default function ProfilePage() {
     async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
-        const url = await uploadToCloudinary(file, 'avatars');
-        setAvatarUrl(url);
+        try {
+            const url = await uploadToCloudinary(file, 'avatars');
+            setAvatarUrl(url);
+        } catch (err: any) {
+            setError(err.message || 'Tải ảnh lên thất bại.');
+        }
     }
 
     async function handleSave() {
@@ -83,7 +88,7 @@ export default function ProfilePage() {
                 <div className="px-8 pb-8">
                     <div className="-mt-10 flex items-end justify-between">
                         {avatarUrl ? (
-                            <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-full object-cover ring-4 ring-white shadow-card" />
+                            <img src={cldOptimize(avatarUrl, 'w_80,h_80,c_fill,g_auto')} alt="avatar" className="h-20 w-20 rounded-full object-cover ring-4 ring-white shadow-card" />
                         ) : (
                             <div className="h-20 w-20 rounded-full bg-brand-gradient ring-4 ring-white shadow-card flex items-center justify-center text-white text-2xl font-bold">
                                 {user.name?.charAt(0).toUpperCase()}

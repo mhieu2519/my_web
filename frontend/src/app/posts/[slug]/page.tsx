@@ -11,6 +11,7 @@ import PostHeaderActions from '@/components/PostHeaderActions';
 import { tagColor } from '@/lib/tagColors';
 import { slugify } from '@/lib/slugify';
 import { formatCount } from '@/lib/format';
+import { cldOptimize } from '@/lib/cloudinary';
 
 const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -190,7 +191,7 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
 
               <div className="flex-1 min-w-0">
                 {post.coverImage && (
-                  <img src={post.coverImage} alt={post.title} className="w-full rounded-xl2 mb-8" />
+                  <img src={cldOptimize(post.coverImage, 'w_1000')} alt={post.title} className="w-full rounded-xl2 mb-8" />
                 )}
 
                 <div

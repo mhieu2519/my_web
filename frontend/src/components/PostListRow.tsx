@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import BookmarkButton from './BookmarkButton';
 import type { PostSummary } from './PostList';
 import { WiTime2 } from "react-icons/wi";
+import { cldOptimize } from '@/lib/cloudinary';
+
 
 export default function PostListRow({ posts }: { posts: PostSummary[] }) {
     const { user } = useAuth();
@@ -72,7 +74,7 @@ export default function PostListRow({ posts }: { posts: PostSummary[] }) {
                         <Link href={`/posts/${post.slug}`} className="flex gap-4 flex-1 min-w-0">
                             {post.coverImage && (
                                 <img
-                                    src={post.coverImage}
+                                    src={cldOptimize(post.coverImage, 'w_320')}
                                     alt={post.title}
                                     className="w-32 h-24 sm:w-40 sm:h-28 rounded-xl2 object-cover shrink-0 group-hover:scale-105 transition-transform duration-300"
                                 />
@@ -92,7 +94,7 @@ export default function PostListRow({ posts }: { posts: PostSummary[] }) {
                                 <div className="mt-auto pt-2 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
                                     <div className="flex items-center gap-1.5 min-w-0">
                                         <img
-                                            src={authorAvatar || fallbackAvatar}
+                                            src={cldOptimize(authorAvatar || fallbackAvatar, 'w_64')}
                                             alt={post.author.name}
                                             className="w-5 h-5 rounded-full object-cover shrink-0 border border-gray-200 dark:border-gray-700"
                                         />

@@ -33,7 +33,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sora)', 'ui-sans-serif', 'system-ui'],
         script: ['var(--font-dancing)', 'cursive'],
-        display: ['var(--font-display)', 'serif'], // tiêu đề kiểu editorial
+        display: ['var(--font-display)', 'serif'],
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #4B7A3A 0%, #2C4E27 100%)',
