@@ -12,7 +12,9 @@ type UserRow = {
     isBanned: boolean;
     emailVerified: boolean;
     createdAt: string;
+    monthlyPostLimit: number;
 };
+
 
 function Content() {
     const [users, setUsers] = useState<UserRow[]>([]);
@@ -23,6 +25,10 @@ function Content() {
         const res = await api.get('/users');
         setUsers(res.data);
         setLoading(false);
+    }
+    async function updateLimit(u: UserRow, value: number) {
+        await api.patch(`/users/${u.id}/post-limit`, { monthlyPostLimit: value });
+        load();
     }
 
     useEffect(() => {
@@ -61,6 +67,7 @@ function Content() {
                                 <th className="px-5 py-3 font-semibold">Email</th>
                                 <th className="px-5 py-3 font-semibold">Quyền</th>
                                 <th className="px-5 py-3 font-semibold">Trạng thái</th>
+                                <th className="px-5 py-3 font-semibold">Giới hạn bài/tháng</th>
                                 <th className="px-5 py-3"></th>
                             </tr>
                         </thead>
@@ -91,6 +98,19 @@ function Content() {
                                         <button onClick={() => removeUser(u)} className="text-red-600 hover:underline font-medium">
                                             Xoá
                                         </button>
+                                    </td>
+                                    <td className="px-5 py-3">
+                                        {u.role === 'USER' ? (
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                defaultValue={u.monthlyPostLimit}
+                                                onBlur={(e) => updateLimit(u, Number(e.target.value) || 0)}
+                                                className="w-20 border-2 border-gray-200 rounded-lg px-2 py-1 text-sm"
+                                            />
+                                        ) : (
+                                            <span className="text-gray-400 text-xs">Không giới hạn</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

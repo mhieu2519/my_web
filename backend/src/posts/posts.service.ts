@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import slugify from 'slugify';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
@@ -15,11 +15,15 @@ function rangeToSince(range?: string): Date | undefined {
   return new Date(Date.now() - days[range] * 24 * 60 * 60 * 1000);
 }
 
+function startOfCurrentMonth(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+}
+
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) { }
 
-  // Sinh slug duy nhất từ 1 chuỗi gốc (dùng cho cả title mặc định lẫn slug tùy chỉnh)
   private async generateUniqueSlug(base: string, excludeId?: string) {
     const baseSlug = slugify(base, { lower: true, strict: true, locale: 'vi' });
     let slug = baseSlug;
@@ -48,7 +52,45 @@ export class PostsService {
     return tags;
   }
 
-  async create(authorId: string, dto: CreatePostDto) {
+  // Số bài đã "gửi duyệt/đăng" trong tháng hiện tại (không tính DRAFT) — tự reset theo tháng
+  async getQuota(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    if (user.role === 'ADMIN') {
+      return { unlimited: true, limit: null as number | null, used: 0, remaining: Infinity };
+    }
+    const used = await this.prisma.post.count({
+      where: {
+        authorId: userId,
+        createdAt: { gte: startOfCurrentMonth() },
+        status: { not: 'DRAFT' },
+      },
+    });
+    return {
+      unlimited: false,
+      limit: user.monthlyPostLimit as number | null,
+      used,
+      remaining: Math.max(0, user.monthlyPostLimit - used),
+    };
+  }
+
+  async create(authorId: string, dto: CreatePostDto, role: string) {
+    let status: CreatePostDto['status'] = dto.status || 'DRAFT';
+
+    if (role !== 'ADMIN') {
+      // User thường không được tự publish/reject — chỉ được lưu nháp hoặc gửi duyệt
+      if (status !== 'DRAFT') status = 'PENDING';
+
+      if (status === 'PENDING') {
+        const quota = await this.getQuota(authorId);
+        if (!quota.unlimited && quota.remaining <= 0) {
+          throw new BadRequestException(
+            `Bạn đã đạt giới hạn ${quota.limit} bài gửi duyệt trong tháng này. Vui lòng thử lại vào tháng sau.`,
+          );
+        }
+      }
+    }
+
     const slug = await this.generateUniqueSlug(dto.slug || dto.title);
     const tags = await this.resolveTags(dto.tags);
 
@@ -59,10 +101,11 @@ export class PostsService {
         content: dto.content,
         excerpt: dto.excerpt,
         coverImage: dto.coverImage,
-        status: dto.status || 'DRAFT',
-        publishedAt: dto.status === 'PUBLISHED' ? new Date() : null,
-        isFeatured: dto.isFeatured ?? false,
+        status,
+        publishedAt: status === 'PUBLISHED' ? new Date() : null,
+        isFeatured: role === 'ADMIN' ? (dto.isFeatured ?? false) : false,
         commentsEnabled: dto.commentsEnabled ?? true,
+        isPrivate: dto.isPrivate ?? false,
         authorId,
         tags: { connect: tags },
       },
@@ -70,6 +113,7 @@ export class PostsService {
     });
   }
 
+  // Bài công khai — kèm lọc private theo viewer
   async findPublished(
     page = 1,
     pageSize = 10,
@@ -78,17 +122,30 @@ export class PostsService {
     sort: 'newest' | 'popular' = 'newest',
     range?: string,
     authorId?: string,
+    viewerId?: string,
+    viewerRole?: string,
   ) {
     const where: any = { status: 'PUBLISHED' };
     if (tagSlug) where.tags = { some: { slug: tagSlug } };
     if (authorId) where.authorId = authorId;
+
+    const andClauses: any[] = [];
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { excerpt: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } },
-      ];
+      andClauses.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { excerpt: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } },
+        ],
+      });
     }
+    if (viewerRole !== 'ADMIN') {
+      andClauses.push({
+        OR: viewerId ? [{ isPrivate: false }, { authorId: viewerId }] : [{ isPrivate: false }],
+      });
+    }
+    if (andClauses.length) where.AND = andClauses;
+
     const since = rangeToSince(range);
     if (since) where.publishedAt = { gte: since };
 
@@ -101,6 +158,7 @@ export class PostsService {
         select: {
           id: true, slug: true, title: true, excerpt: true, coverImage: true,
           publishedAt: true, updatedAt: true, views: true, content: true, isFeatured: true,
+          isPrivate: true,
           author: { select: { id: true, name: true, avatarUrl: true } },
           tags: true,
           _count: { select: { comments: true, reactions: true } },
@@ -119,7 +177,7 @@ export class PostsService {
 
   async findPopular(limit = 4, tagSlug?: string) {
     return this.prisma.post.findMany({
-      where: { status: 'PUBLISHED', ...(tagSlug ? { tags: { some: { slug: tagSlug } } } : {}) },
+      where: { status: 'PUBLISHED', isPrivate: false, ...(tagSlug ? { tags: { some: { slug: tagSlug } } } : {}) },
       orderBy: { views: 'desc' },
       take: limit,
       select: { id: true, slug: true, title: true, coverImage: true, views: true, publishedAt: true },
@@ -127,7 +185,7 @@ export class PostsService {
   }
 
   async searchFacets(search?: string, range?: string) {
-    const baseWhere: any = { status: 'PUBLISHED' };
+    const baseWhere: any = { status: 'PUBLISHED', isPrivate: false };
     if (search) {
       baseWhere.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -153,9 +211,12 @@ export class PostsService {
     };
   }
 
-  async findAllForAdmin(page = 1, pageSize = 20) {
+  async findAllForAdmin(page = 1, pageSize = 20, status?: string) {
+    const where: any = {};
+    if (status) where.status = status;
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
+        where,
         orderBy: { updatedAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -165,12 +226,27 @@ export class PostsService {
           _count: { select: { comments: true } },
         },
       }),
-      this.prisma.post.count(),
+      this.prisma.post.count({ where }),
     ]);
     return { items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 
-  async findBySlug(slug: string) {
+  // Bài của chính user (mọi trạng thái) — dùng cho trang "Bài viết của tôi"
+  async findMine(userId: string, page = 1, pageSize = 10) {
+    const [items, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { authorId: userId },
+        orderBy: { updatedAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { tags: true, _count: { select: { comments: true } } },
+      }),
+      this.prisma.post.count({ where: { authorId: userId } }),
+    ]);
+    return { items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  }
+
+  async findBySlug(slug: string, viewerId?: string, viewerRole?: string) {
     const post = await this.prisma.post.findUnique({
       where: { slug },
       include: {
@@ -182,7 +258,17 @@ export class PostsService {
     });
     if (!post) throw new NotFoundException('Không tìm thấy bài viết');
 
-    this.prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } }).catch(() => { });
+    const isOwnerOrAdmin = viewerRole === 'ADMIN' || post.authorId === viewerId;
+    if (post.status !== 'PUBLISHED' && !isOwnerOrAdmin) {
+      throw new NotFoundException('Không tìm thấy bài viết');
+    }
+    if (post.isPrivate && !isOwnerOrAdmin) {
+      throw new NotFoundException('Không tìm thấy bài viết');
+    }
+
+    if (post.status === 'PUBLISHED') {
+      this.prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } }).catch(() => { });
+    }
 
     return post;
   }
@@ -201,6 +287,22 @@ export class PostsService {
 
     const data: any = { ...dto };
     delete data.tags;
+
+    if (role !== 'ADMIN') {
+      // User thường không được tự chuyển bài sang PUBLISHED/REJECTED
+      if (dto.status === 'PUBLISHED' || dto.status === 'REJECTED') {
+        throw new ForbiddenException('Chỉ quản trị viên mới có thể duyệt bài viết');
+      }
+      if (dto.status === 'PENDING' && post.status !== 'PENDING') {
+        const quota = await this.getQuota(userId);
+        if (!quota.unlimited && quota.remaining <= 0) {
+          throw new BadRequestException(
+            `Bạn đã đạt giới hạn ${quota.limit} bài gửi duyệt trong tháng này. Vui lòng thử lại vào tháng sau.`,
+          );
+        }
+      }
+      delete data.isFeatured; // chỉ admin mới được ghim bài nổi bật
+    }
 
     if (dto.slug) {
       data.slug = await this.generateUniqueSlug(dto.slug, id);

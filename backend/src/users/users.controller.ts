@@ -4,8 +4,7 @@ import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UsersService } from './users.service';
-import { IsOptional, IsString, MaxLength, IsIn } from 'class-validator';
-
+import { IsOptional, IsString, MaxLength, IsIn, IsInt, Min, Max } from 'class-validator';
 class UpdateProfileDto {
   @IsOptional() @IsString() @MaxLength(50) name?: string;
   @IsOptional() @IsString() avatarUrl?: string;
@@ -25,6 +24,11 @@ class SetRoleDto {
 class SetBannedDto {
   @IsIn([true, false])
   isBanned!: boolean;
+}
+
+class SetPostLimitDto {
+  @IsInt() @Min(0) @Max(1000)
+  monthlyPostLimit!: number;
 }
 
 @Controller('users')
@@ -77,4 +81,12 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch(':id/post-limit')
+  setPostLimit(@Param('id') id: string, @Body() dto: SetPostLimitDto) {
+    return this.usersService.setMonthlyPostLimit(id, dto.monthlyPostLimit);
+  }
+
 }

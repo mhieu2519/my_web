@@ -14,7 +14,9 @@ enum Role {
 
 enum PostStatus {
   DRAFT
+  PENDING
   PUBLISHED
+  REJECTED
 }
 
 enum ReactionType {
@@ -56,6 +58,7 @@ model User {
   bookmarks          Bookmark[]
   following          Follow[]                 @relation("Follower")
   followers          Follow[]                 @relation("Following")
+  monthlyPostLimit   Int                      @default(5)
 }
 
 model PasswordResetToken {
@@ -115,6 +118,7 @@ model Post {
   reactions Reaction[]
 
   bookmarks Bookmark[]
+  isPrivate Boolean    @default(false)
 
   @@index([status, publishedAt])
 }

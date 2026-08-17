@@ -40,6 +40,7 @@ function DashboardContent() {
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <h1 className="text-2xl font-bold heading-gradient inline-block">Quản trị bài viết</h1>
         <div className="flex items-center gap-2 flex-wrap text-sm">
+          <Link href="/admin/pending" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Chờ duyệt</Link>
           <Link href="/admin/users" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Người dùng</Link>
           <Link href="/admin/comments" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Bình luận</Link>
           <Link href="/admin/tags" className="px-3 py-1.5 rounded-full hover:bg-brand-50 text-gray-600 hover:text-brand-600 transition-colors">Thẻ</Link>

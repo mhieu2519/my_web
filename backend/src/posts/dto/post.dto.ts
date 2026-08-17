@@ -1,5 +1,7 @@
 import { IsString, IsOptional, IsIn, MaxLength, IsArray, MinLength, IsBoolean } from 'class-validator';
 
+const STATUSES = ['DRAFT', 'PENDING', 'PUBLISHED', 'REJECTED'] as const;
+
 export class CreatePostDto {
   @IsString() @MinLength(3) @MaxLength(200)
   title: string;
@@ -13,8 +15,8 @@ export class CreatePostDto {
   @IsOptional() @IsString()
   coverImage?: string;
 
-  @IsOptional() @IsIn(['DRAFT', 'PUBLISHED'])
-  status?: 'DRAFT' | 'PUBLISHED';
+  @IsOptional() @IsIn(STATUSES)
+  status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
 
   @IsOptional() @IsArray()
   tags?: string[];
@@ -27,6 +29,9 @@ export class CreatePostDto {
 
   @IsOptional() @IsBoolean()
   commentsEnabled?: boolean;
+
+  @IsOptional() @IsBoolean()
+  isPrivate?: boolean;
 }
 
 export class UpdatePostDto {
@@ -42,8 +47,8 @@ export class UpdatePostDto {
   @IsOptional() @IsString()
   coverImage?: string;
 
-  @IsOptional() @IsIn(['DRAFT', 'PUBLISHED'])
-  status?: 'DRAFT' | 'PUBLISHED';
+  @IsOptional() @IsIn(STATUSES)
+  status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
 
   @IsOptional() @IsArray()
   tags?: string[];
@@ -56,4 +61,7 @@ export class UpdatePostDto {
 
   @IsOptional() @IsBoolean()
   commentsEnabled?: boolean;
+
+  @IsOptional() @IsBoolean()
+  isPrivate?: boolean;
 }

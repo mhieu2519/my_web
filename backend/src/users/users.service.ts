@@ -9,7 +9,7 @@ export class UsersService {
     return this.prisma.user.findMany({
       select: {
         id: true, email: true, name: true, role: true, avatarUrl: true,
-        isBanned: true, emailVerified: true, createdAt: true,
+        isBanned: true, emailVerified: true, createdAt: true, monthlyPostLimit: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -110,4 +110,13 @@ export class UsersService {
     await this.prisma.user.delete({ where: { id } });
     return { success: true };
   }
+
+  async setMonthlyPostLimit(id: string, limit: number) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { monthlyPostLimit: limit },
+      select: { id: true, email: true, name: true, monthlyPostLimit: true },
+    });
+  }
 }
+

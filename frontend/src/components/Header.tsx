@@ -214,7 +214,7 @@ export default function Header() {
                     Hồ sơ
                   </Link>
 
-                  {user.role === 'ADMIN' && (
+                  {user.role === 'ADMIN' ? (
                     <>
                       <Link
                         href="/admin/dashboard"
@@ -231,6 +231,25 @@ export default function Header() {
                       >
                         <IoCreateOutline />
                         Viết bài mới
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/write"
+                        onClick={() => setOpenMenu(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 font-medium"
+                      >
+                        <IoCreateOutline />
+                        Viết bài
+                      </Link>
+                      <Link
+                        href="/my-posts"
+                        onClick={() => setOpenMenu(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-700 dark:text-gray-200"
+                      >
+                        <CgProfile className="text-brand-500" />
+                        Bài viết của tôi
                       </Link>
                     </>
                   )}

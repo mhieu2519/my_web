@@ -7,6 +7,7 @@ import { uploadToCloudinary } from '@/lib/upload';
 import PostEditor from '@/components/PostEditor';
 import { slugify } from '@/lib/slugify';
 import { cldOptimize } from '@/lib/cloudinary';
+import { useAuth } from '@/hooks/useAuth';
 
 type TagRow = { id: string; name: string; slug: string };
 
@@ -16,10 +17,11 @@ type InitialData = {
   excerpt?: string;
   content?: string;
   coverImage?: string;
-  status?: 'DRAFT' | 'PUBLISHED';
+  status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
   slug?: string;
   isFeatured?: boolean;
   commentsEnabled?: boolean;
+  isPrivate?: boolean;
   tags?: { name: string }[];
 };
 
@@ -45,6 +47,21 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   const [error, setError] = useState('');
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+  const [isPrivate, setIsPrivate] = useState(initial?.isPrivate ?? false);
+  const [quota, setQuota] = useState<{
+    unlimited: boolean;
+    limit: number | null;
+    used: number;
+    remaining: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      api.get('/posts/my-quota').then((res) => setQuota(res.data)).catch(() => { });
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     api.get('/tags').then((res) => setAllTags(res.data)).catch(() => { });
@@ -104,12 +121,13 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
     });
   }
 
-  async function handleSubmit(status: 'DRAFT' | 'PUBLISHED') {
+  async function handleSubmit(status: 'DRAFT' | 'PENDING' | 'PUBLISHED') {
     setError('');
     if (!title.trim() || !content.trim()) {
       setError('Vui lòng nhập tiêu đề và nội dung');
       return;
     }
+    const finalStatus = isAdmin ? status : (status === 'DRAFT' ? 'DRAFT' : 'PENDING');
     setSubmitting(true);
     const tags = Array.from(new Set([...Array.from(selectedCategories), ...extraTags]));
     const payload: any = {
@@ -117,10 +135,11 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
       excerpt: excerpt || undefined,
       content,
       coverImage: coverImage || undefined,
-      status,
+      status: finalStatus,
       tags,
-      isFeatured,
+      isFeatured: isAdmin ? isFeatured : undefined,
       commentsEnabled,
+      isPrivate,
     };
     if (editingSlug && slugValue.trim()) payload.slug = slugValue.trim();
     try {
@@ -130,7 +149,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
         await api.post('/posts', payload);
       }
       localStorage.removeItem(`post-draft:${initial?.id || 'new'}`);
-      router.push('/admin/dashboard');
+      router.push(isAdmin ? '/admin/dashboard' : '/my-posts');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
     } finally {
@@ -228,11 +247,20 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               Cho phép bình luận
               <input type="checkbox" checked={commentsEnabled} onChange={(e) => setCommentsEnabled(e.target.checked)} className="w-5 h-5 accent-brand-500" />
             </label>
+            {isAdmin && (
+              <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                Đặt làm bài viết nổi bật
+                <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="w-5 h-5 accent-brand-500" />
+              </label>
+            )}
             <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-              Đặt làm bài viết nổi bật
-              <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="w-5 h-5 accent-brand-500" />
+              🔒 Bài viết riêng tư
+              <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="w-5 h-5 accent-brand-500" />
             </label>
           </div>
+          {isPrivate && (
+            <p className="text-xs text-gray-400 mt-2">Chỉ bạn và quản trị viên có thể xem bài viết này.</p>
+          )}
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -240,7 +268,14 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
 
       <div className="space-y-5">
         <div className="card p-5">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Đăng bài</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+            {isAdmin ? 'Đăng bài' : 'Gửi bài viết'}
+          </h3>
+          {!isAdmin && quota && !quota.unlimited && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Còn <span className="font-semibold text-brand-600">{quota.remaining}</span>/{quota.limit} lượt gửi duyệt trong tháng này.
+            </p>
+          )}
           <div className="flex gap-2 mb-3">
             <button onClick={() => handleSubmit('DRAFT')} disabled={submitting} className="btn-outline flex-1 text-sm">
               Lưu nháp
@@ -249,14 +284,23 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               👁 Xem trước
             </button>
           </div>
-          <button onClick={() => handleSubmit('PUBLISHED')} disabled={submitting} className="btn-primary w-full text-sm">
-            {submitting ? 'Đang xử lý...' : '📤 Đăng bài'}
+          <button
+            onClick={() => handleSubmit(isAdmin ? 'PUBLISHED' : 'PENDING')}
+            disabled={submitting || (!isAdmin && !!quota && !quota.unlimited && quota.remaining <= 0)}
+            className="btn-primary w-full text-sm"
+          >
+            {submitting ? 'Đang xử lý...' : isAdmin ? '📤 Đăng bài' : '📨 Gửi duyệt'}
           </button>
           <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 space-y-1.5">
-            <p>Trạng thái: <span className="font-medium text-gray-700 dark:text-gray-200">{initial?.status === 'PUBLISHED' ? 'Đã đăng' : 'Nháp'}</span></p>
-            <p>Hiển thị: <span className="font-medium text-gray-700 dark:text-gray-200">Công khai</span></p>
+            <p>Trạng thái: <span className="font-medium text-gray-700 dark:text-gray-200">
+              {{ DRAFT: 'Nháp', PENDING: 'Chờ duyệt', PUBLISHED: 'Đã đăng', REJECTED: 'Bị từ chối' }[initial?.status as string] || 'Nháp'}
+            </span></p>
+            <p>Hiển thị: <span className="font-medium text-gray-700 dark:text-gray-200">
+              {isPrivate ? 'Riêng tư (chỉ bạn & admin)' : 'Công khai'}
+            </span></p>
           </div>
         </div>
+
 
         <div className="card p-5">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Chuyên mục</h3>
