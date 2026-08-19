@@ -52,6 +52,8 @@ export default function EditPostPage() {
             content: post.content,
             excerpt: post.excerpt,
             coverImage: post.coverImage,
+            coverCaption: post.coverCaption,
+            hashtags: post.hashtags,
             status: post.status,
             slug: post.slug,
             isFeatured: post.isFeatured,

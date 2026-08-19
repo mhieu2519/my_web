@@ -8,8 +8,16 @@ body {
   @apply bg-[#f9f8f3] text-gray-900 dark:bg-brand-900 dark:text-gray-100 transition-colors duration-200;
 }
 
-.prose img {
-  @apply rounded-xl2;
+.prose img,
+.ProseMirror img {
+  @apply rounded-xl2 max-w-full h-auto;
+}
+
+.prose pre,
+.prose table,
+.ProseMirror pre,
+.ProseMirror table {
+  @apply max-w-full overflow-x-auto;
 }
 
 @layer components {
@@ -35,5 +43,13 @@ body {
 
   .ProseMirror {
     @apply prose max-w-none min-h-[300px] border-2 border-t-0 border-brand-100 rounded-b-xl px-5 py-4 focus:outline-none;
+  }
+
+  .prose .post-gallery {
+    @apply grid grid-cols-3 gap-3 my-6;
+  }
+
+  .prose .post-gallery img {
+    @apply w-full h-32 sm:h-40 object-cover rounded-xl2 m-0;
   }
 }

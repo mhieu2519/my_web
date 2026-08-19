@@ -17,6 +17,8 @@ type InitialData = {
   excerpt?: string;
   content?: string;
   coverImage?: string;
+  coverCaption?: string;
+  hashtags?: string[];
   status?: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
   slug?: string;
   isFeatured?: boolean;
@@ -56,7 +58,16 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
     used: number;
     remaining: number;
   } | null>(null);
+  const [coverCaption, setCoverCaption] = useState(initial?.coverCaption || '');
+  const [hashtagInput, setHashtagInput] = useState('');
+  const [hashtags, setHashtags] = useState<string[]>(initial?.hashtags || []);
 
+  function addHashtag() {
+    const raw = hashtagInput.trim().replace(/^#/, '');
+    if (!raw) return;
+    if (!hashtags.includes(raw)) setHashtags((prev) => [...prev, raw]);
+    setHashtagInput('');
+  }
   useEffect(() => {
     if (!isAdmin) {
       api.get('/posts/my-quota').then((res) => setQuota(res.data)).catch(() => { });
@@ -135,6 +146,8 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
       excerpt: excerpt || undefined,
       content,
       coverImage: coverImage || undefined,
+      coverCaption: coverCaption || undefined,
+      hashtags,
       status: finalStatus,
       tags,
       isFeatured: isAdmin ? isFeatured : undefined,
@@ -160,8 +173,8 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   const wordCount = content.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
 
   return (
-    <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-      <div className="space-y-5">
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+      <div className="space-y-5 min-w-0">
         <div className="card p-5">
           <div className="flex items-center justify-end mb-1">
             <span className="text-xs text-gray-400">{title.length}/120</span>
@@ -238,6 +251,16 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
             </label>
           )}
+        </div>
+
+        <div className="mt-3">
+          <label className="block text-xs font-medium mb-1 text-gray-500">Chú thích ảnh (hiển thị dưới ảnh)</label>
+          <input
+            value={coverCaption}
+            onChange={(e) => setCoverCaption(e.target.value)}
+            placeholder="VD: Một buổi sáng bình yên tại đèo Mã Pí Lèng..."
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+          />
         </div>
 
         <div className="card p-5">
@@ -335,6 +358,30 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               }
             }}
             placeholder="Nhập thẻ và nhấn Enter..."
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+          />
+        </div>
+
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Hashtag (hiển thị cuối bài)</h3>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {hashtags.map((t) => (
+              <span key={t} className="flex items-center gap-1 text-xs bg-brand-50 dark:bg-brand-800 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-full">
+                #{t}
+                <button type="button" onClick={() => setHashtags((prev) => prev.filter((x) => x !== t))} className="hover:text-red-500">✕</button>
+              </span>
+            ))}
+          </div>
+          <input
+            value={hashtagInput}
+            onChange={(e) => setHashtagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addHashtag();
+              }
+            }}
+            placeholder="VD: hagiang, dulky, travel..."
             className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
           />
         </div>

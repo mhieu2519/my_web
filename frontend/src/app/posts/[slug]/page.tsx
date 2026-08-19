@@ -4,10 +4,13 @@ import type { Metadata } from 'next';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { IoCheckmarkCircle } from 'react-icons/io5';
+import { FaFacebook, FaInstagram, FaGithub, FaGlobe } from 'react-icons/fa6';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import ReactionBar from '@/components/ReactionBar';
 import CommentSection from '@/components/CommentSection';
 import ShareButtons from '@/components/ShareButtons';
 import PostHeaderActions from '@/components/PostHeaderActions';
+import TableOfContents from '@/components/TableOfContents';
 import { tagColor } from '@/lib/tagColors';
 import { slugify } from '@/lib/slugify';
 import { formatCount } from '@/lib/format';
@@ -23,12 +26,20 @@ type Post = {
   excerpt: string | null;
   content: string;
   coverImage: string | null;
+  coverCaption: string | null;
+  hashtags: string[];
   publishedAt: string;
   views: number;
-  author: { id: string; name: string; avatarUrl: string | null };
+  author: {
+    id: string; name: string; avatarUrl: string | null; bio: string | null;
+    websiteUrl: string | null; facebookUrl: string | null; instagramUrl: string | null; githubUrl: string | null;
+    role: 'ADMIN' | 'USER';
+  };
   commentsEnabled?: boolean;
   tags: { id: string; name: string; slug?: string }[];
   reactions: { type: string; userId: string }[];
+  prevPost: { slug: string; title: string } | null;
+  nextPost: { slug: string; title: string } | null;
 };
 
 type RelatedPost = {
@@ -80,8 +91,9 @@ function estimateReadTime(html: string) {
   return Math.max(1, Math.round(words / 200));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getPost(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) return { title: 'Không tìm thấy bài viết' };
 
   const description = post.content.replace(/<[^>]+>/g, '').slice(0, 160);
@@ -110,8 +122,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function PostDetailPage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const primaryTag = post.tags[0];
@@ -123,8 +136,17 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
   const timeAgo = formatDistanceToNow(new Date(post.publishedAt), { addSuffix: true, locale: vi });
   const shareUrl = `${SITE_URL}/posts/${post.slug}`;
 
+  const socialLinks = [
+    post.author.websiteUrl && { href: post.author.websiteUrl, icon: FaGlobe, label: 'Website' },
+    post.author.facebookUrl && { href: post.author.facebookUrl, icon: FaFacebook, label: 'Facebook' },
+    post.author.instagramUrl && { href: post.author.instagramUrl, icon: FaInstagram, label: 'Instagram' },
+    post.author.githubUrl && { href: post.author.githubUrl, icon: FaGithub, label: 'Github' },
+  ].filter(Boolean) as { href: string; icon: any; label: string }[];
+
   return (
-    <div className="-mx-4 md:-mx-[calc((64rem-48rem)/2)]">
+    //<div className="-mx-4 md:-mx-[calc((64rem-48rem)/2)] overflow-x-hidden">
+    //<div className=" overflow-x-hidden">
+    <div>
       <div className="max-w-5xl mx-auto px-4">
         <nav className="text-sm text-gray-400 mb-6 flex items-center gap-1.5 flex-wrap">
           <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-300">Trang chủ</Link>
@@ -138,8 +160,8 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
           <span className="text-gray-600 dark:text-gray-300 truncate max-w-[60vw]">{post.title}</span>
         </nav>
 
-        <div className="grid lg:grid-cols-[1fr_300px] gap-10">
-          <article>
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-10">
+          <article className="min-w-0">
             <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
               <div className="flex gap-2 flex-wrap">
                 {post.tags.map((t) => {
@@ -191,19 +213,69 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
 
               <div className="flex-1 min-w-0">
                 {post.coverImage && (
-                  <img src={cldOptimize(post.coverImage, 'w_1000')} alt={post.title} className="w-full rounded-xl2 mb-8" />
+                  <figure className="mb-8">
+                    <img src={cldOptimize(post.coverImage, 'w_1000')} alt={post.title} className="w-full rounded-xl2" />
+                    {post.coverCaption && (
+                      <figcaption className="text-center text-sm text-gray-400 dark:text-gray-500 italic mt-2.5">
+                        {post.coverCaption}
+                      </figcaption>
+                    )}
+                  </figure>
                 )}
 
                 <div
                   className="prose dark:prose-invert max-w-none prose-headings:font-display prose-headings:font-bold prose-a:text-brand-600"
                   dangerouslySetInnerHTML={{ __html: contentWithIds }}
                 />
+
+                {post.hashtags?.length > 0 && (
+                  <div className="mt-8 flex flex-wrap gap-2 pt-6 border-t border-brand-100 dark:border-brand-800">
+                    {post.hashtags.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/search?q=${encodeURIComponent(tag)}`}
+                        className="text-sm text-brand-600 dark:text-brand-300 hover:underline"
+                      >
+                        #{tag}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="mt-10 border-t border-brand-100 dark:border-brand-800 pt-8">
               <ReactionBar postId={post.id} />
             </div>
+
+            {(post.prevPost || post.nextPost) && (
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                {post.prevPost ? (
+                  <Link
+                    href={`/posts/${post.prevPost.slug}`}
+                    className="card p-4 flex items-center gap-2 hover:border-brand-300 border-2 border-transparent transition-colors"
+                  >
+                    <HiChevronLeft className="text-gray-400 shrink-0" size={20} />
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-400">Bài trước</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{post.prevPost.title}</p>
+                    </div>
+                  </Link>
+                ) : <div />}
+                {post.nextPost ? (
+                  <Link
+                    href={`/posts/${post.nextPost.slug}`}
+                    className="card p-4 flex items-center justify-end gap-2 text-right hover:border-brand-300 border-2 border-transparent transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-400">Bài tiếp theo</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{post.nextPost.title}</p>
+                    </div>
+                    <HiChevronRight className="text-gray-400 shrink-0" size={20} />
+                  </Link>
+                ) : <div />}
+              </div>
+            )}
 
             {post.commentsEnabled === false ? (
               <p className="mt-10 text-sm text-gray-400 border-t border-brand-100 dark:border-brand-800 pt-8">
@@ -219,18 +291,42 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
               <h3 className="font-bold text-sm mb-3 text-gray-800 dark:text-gray-100">Tác giả</h3>
               <div className="flex items-center gap-3">
                 {post.author.avatarUrl ? (
-                  <img src={post.author.avatarUrl} alt="" className="w-12 h-12 rounded-full object-cover" />
+                  <img src={cldOptimize(post.author.avatarUrl, 'w_96,h_96,c_fill,g_auto')} alt="" className="w-12 h-12 rounded-full object-cover" />
                 ) : (
                   <span className="w-12 h-12 rounded-full bg-brand-gradient inline-block" />
                 )}
                 <div className="min-w-0">
                   <div className="flex items-center gap-1 font-semibold text-gray-800 dark:text-gray-100">
                     {post.author.name}
-                    <IoCheckmarkCircle className="text-brand-500 shrink-0" size={15} />
+                    {post.author.role === 'ADMIN' && <IoCheckmarkCircle className="text-brand-500 shrink-0" size={15} />}
                   </div>
                   <p className="text-xs text-gray-400">Tác giả tại Lặng 24 🌿</p>
                 </div>
               </div>
+
+              {post.author.bio && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed line-clamp-3">
+                  {post.author.bio}
+                </p>
+              )}
+
+              {socialLinks.length > 0 && (
+                <div className="flex gap-2 mt-4">
+                  {socialLinks.map(({ href, icon: Icon, label }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="w-8 h-8 rounded-full bg-brand-50 dark:bg-brand-800 text-brand-700 dark:text-brand-300 flex items-center justify-center hover:bg-brand-100 dark:hover:bg-brand-700 transition-colors"
+                    >
+                      <Icon size={14} />
+                    </a>
+                  ))}
+                </div>
+              )}
+
               <Link
                 href={`/authors/${post.author.id}`}
                 className="btn-outline w-full text-center text-sm mt-4 block"
@@ -239,20 +335,7 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
               </Link>
             </div>
 
-            {headings.length > 0 && (
-              <div className="card p-5">
-                <h3 className="font-bold text-sm mb-3 text-gray-800 dark:text-gray-100">Mục lục</h3>
-                <ol className="space-y-2 text-sm">
-                  {headings.map((h, i) => (
-                    <li key={h.id}>
-                      <a href={`#${h.id}`} className="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-300 transition-colors line-clamp-2">
-                        {i + 1}. {h.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
+            {headings.length > 0 && <TableOfContents headings={headings} />}
 
             {related.length > 0 && (
               <div className="card p-5">

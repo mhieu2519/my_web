@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaFacebookF, FaInstagram, FaPinterestP, FaXTwitter, FaGithub } from 'react-icons/fa6';
+import { FaFacebookF, FaInstagram, FaPinterestP, FaXTwitter, FaGithub, FaYoutube } from 'react-icons/fa6';
 
 const COLUMN_LINKS = [
     { label: 'Giới thiệu', href: '/about' },
@@ -26,28 +26,29 @@ export default function Footer() {
                 {/* Khối ở giữa: Icon mạng xã hội tròn */}
                 <div className="flex items-center gap-3">
                     <a
-                        href="#"
-                        aria-label="Facebook"
+                        href="https://www.youtube.com/@hieunm2519"
+                        aria-label="YouTube"
                         className="w-9 h-9 rounded-full border border-brand-200 dark:border-brand-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-600 dark:hover:border-brand-300 transition-colors"
                     >
-                        <FaFacebookF size={14} />
+                        <FaYoutube size={15} />
                     </a>
+
                     <a
-                        href="#"
+                        href="https://www.instagram.com/hnm_241"
                         aria-label="Instagram"
                         className="w-9 h-9 rounded-full border border-brand-200 dark:border-brand-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-600 dark:hover:border-brand-300 transition-colors"
                     >
                         <FaInstagram size={15} />
                     </a>
                     <a
-                        href="#"
+                        href="https://www.pinterest.com/minhhieu00"
                         aria-label="Pinterest"
                         className="w-9 h-9 rounded-full border border-brand-200 dark:border-brand-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-600 dark:hover:border-brand-300 transition-colors"
                     >
                         <FaPinterestP size={14} />
                     </a>
                     <a
-                        href="#"
+                        href="https://x.com/minhhieuhd"
                         aria-label="X / Twitter"
                         className="w-9 h-9 rounded-full border border-brand-200 dark:border-brand-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-600 dark:hover:border-brand-300 transition-colors"
                     >

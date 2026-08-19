@@ -101,6 +101,8 @@ export class PostsService {
         content: dto.content,
         excerpt: dto.excerpt,
         coverImage: dto.coverImage,
+        coverCaption: dto.coverCaption,
+        hashtags: dto.hashtags ?? [],
         status,
         publishedAt: status === 'PUBLISHED' ? new Date() : null,
         isFeatured: role === 'ADMIN' ? (dto.isFeatured ?? false) : false,
@@ -251,7 +253,13 @@ export class PostsService {
       where: { slug },
       include: {
         tags: true,
-        author: { select: { id: true, name: true, avatarUrl: true } },
+        author: {
+          select: {
+            id: true, name: true, avatarUrl: true, bio: true,
+            websiteUrl: true, facebookUrl: true, instagramUrl: true, githubUrl: true,
+            role: true,
+          },
+        },
         _count: { select: { comments: true } },
         reactions: { select: { type: true, userId: true } },
       },
@@ -270,7 +278,22 @@ export class PostsService {
       this.prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } }).catch(() => { });
     }
 
-    return post;
+    const [prevPost, nextPost] = post.publishedAt
+      ? await Promise.all([
+        this.prisma.post.findFirst({
+          where: { status: 'PUBLISHED', isPrivate: false, publishedAt: { lt: post.publishedAt } },
+          orderBy: { publishedAt: 'desc' },
+          select: { slug: true, title: true },
+        }),
+        this.prisma.post.findFirst({
+          where: { status: 'PUBLISHED', isPrivate: false, publishedAt: { gt: post.publishedAt } },
+          orderBy: { publishedAt: 'asc' },
+          select: { slug: true, title: true },
+        }),
+      ])
+      : [null, null];
+
+    return { ...post, prevPost, nextPost };
   }
 
   async findByIdForEdit(id: string, userId: string, role: string) {

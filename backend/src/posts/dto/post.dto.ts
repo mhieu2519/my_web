@@ -32,6 +32,12 @@ export class CreatePostDto {
 
   @IsOptional() @IsBoolean()
   isPrivate?: boolean;
+
+  @IsOptional() @IsString() @MaxLength(300)
+  coverCaption?: string;
+
+  @IsOptional() @IsArray()
+  hashtags?: string[];
 }
 
 export class UpdatePostDto {
@@ -64,4 +70,10 @@ export class UpdatePostDto {
 
   @IsOptional() @IsBoolean()
   isPrivate?: boolean;
+
+  @IsOptional() @IsString() @MaxLength(300)
+  coverCaption?: string;
+
+  @IsOptional() @IsArray()
+  hashtags?: string[];
 }
