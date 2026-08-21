@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
+import 'multer';
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 @Injectable()
 export class UploadService {
@@ -12,25 +15,26 @@ export class UploadService {
     });
   }
 
-  // Ký chữ ký để client upload thẳng lên Cloudinary, không qua server (nhẹ tải backend)
-  createSignedUpload(userId: string, folder: 'posts' | 'avatars' = 'posts') {
-    const timestamp = Math.round(Date.now() / 1000);
+  async uploadImage(userId: number, file: Express.Multer.File, folder: 'posts' | 'avatars' = 'posts') {
+    if (!file) throw new BadRequestException('Thiếu file ảnh');
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException('Định dạng ảnh không được hỗ trợ (chỉ nhận JPG, PNG, WEBP, GIF)');
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException('Ảnh vượt quá 5MB');
+    }
+
     const uploadFolder = `my_web/${folder}/${userId}`;
 
-    // Chỉ những tham số nằm trong object này mới được đưa vào chữ ký,
-    // client phải gửi lên đúng các tham số này khi upload thì chữ ký mới khớp
-    const paramsToSign = { timestamp, folder: uploadFolder };
-    const signature = cloudinary.utils.api_sign_request(
-      paramsToSign,
-      this.config.get('CLOUDINARY_API_SECRET')!,
-    );
-
-    return {
-      signature,
-      timestamp,
-      folder: uploadFolder,
-      apiKey: this.config.get('CLOUDINARY_API_KEY'),
-      cloudName: this.config.get('CLOUDINARY_CLOUD_NAME'),
-    };
+    return new Promise<{ secureUrl: string }>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: uploadFolder, resource_type: 'image' },
+        (error, result) => {
+          if (error || !result) return reject(error);
+          resolve({ secureUrl: result.secure_url });
+        },
+      );
+      stream.end(file.buffer);
+    });
   }
 }

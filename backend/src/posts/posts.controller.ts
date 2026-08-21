@@ -31,7 +31,7 @@ export class PostsController {
       search,
       sort === 'popular' ? 'popular' : 'newest',
       range,
-      authorId,
+      authorId ? Number(authorId) : undefined,
       req.user?.userId,
       req.user?.role,
     );

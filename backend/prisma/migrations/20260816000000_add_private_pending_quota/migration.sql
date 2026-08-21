@@ -1,9 +1,0 @@
--- AlterEnum
-ALTER TYPE "PostStatus" ADD VALUE 'PENDING';
-ALTER TYPE "PostStatus" ADD VALUE 'REJECTED';
-
--- AlterTable
-ALTER TABLE "Post" ADD COLUMN "isPrivate" BOOLEAN NOT NULL DEFAULT false;
-
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "monthlyPostLimit" INTEGER NOT NULL DEFAULT 5;

@@ -8,7 +8,7 @@ type Comment = {
   id: string;
   content: string;
   createdAt: string;
-  author: { id: string; name: string; avatarUrl: string | null };
+  author: { id: number; name: string; avatarUrl: string | null };
   replies: Comment[];
 };
 

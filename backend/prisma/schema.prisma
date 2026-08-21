@@ -29,7 +29,7 @@ enum ReactionType {
 }
 
 model User {
-  id            String  @id @default(cuid())
+  id            Int     @id @default(autoincrement())
   email         String  @unique
   passwordHash  String?
   googleId      String? @unique
@@ -49,23 +49,27 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  posts              Post[]
-  comments           Comment[]
-  reactions          Reaction[]
-  refreshTokens      RefreshToken[]
-  passwordResets     PasswordResetToken[]
-  emailVerifications EmailVerificationToken[]
-  bookmarks          Bookmark[]
-  following          Follow[]                 @relation("Follower")
-  followers          Follow[]                 @relation("Following")
-  monthlyPostLimit   Int                      @default(5)
+  posts               Post[]
+  comments            Comment[]
+  reactions           Reaction[]
+  refreshTokens       RefreshToken[]
+  passwordResets      PasswordResetToken[]
+  emailVerifications  EmailVerificationToken[]
+  bookmarks           Bookmark[]
+  following           Follow[]                 @relation("Follower")
+  followers           Follow[]                 @relation("Following")
+  monthlyPostLimit    Int                      @default(5)
+  failedLoginAttempts Int                      @default(0)
+  lockedUntil         DateTime?
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean                  @default(false)
 }
 
 model PasswordResetToken {
   id        String   @id @default(cuid())
   tokenHash String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -76,8 +80,8 @@ model PasswordResetToken {
 model EmailVerificationToken {
   id        String   @id @default(cuid())
   tokenHash String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -87,8 +91,8 @@ model EmailVerificationToken {
 model RefreshToken {
   id        String   @id @default(cuid())
   tokenHash String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -109,8 +113,8 @@ model Post {
   views           Int        @default(0)
   isFeatured      Boolean    @default(false)
   commentsEnabled Boolean    @default(true)
-  authorId        String
-  author          User       @relation(fields: [authorId], references: [id])
+  authorId        Int
+  author          User       @relation(fields: [authorId], references: [id], onUpdate: Cascade)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   publishedAt     DateTime?
@@ -137,8 +141,8 @@ model Comment {
   content   String    @db.Text
   postId    String
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId  String
-  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id], onUpdate: Cascade)
   parentId  String?
   parent    Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies   Comment[] @relation("Replies")
@@ -150,8 +154,8 @@ model Comment {
 
 model Bookmark {
   id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -162,10 +166,10 @@ model Bookmark {
 
 model Follow {
   id          String   @id @default(cuid())
-  followerId  String
-  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
-  followingId String
-  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  followerId  Int
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  followingId Int
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
@@ -177,8 +181,8 @@ model Reaction {
   type      ReactionType
   postId    String
   post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime     @default(now())
 
   @@unique([postId, userId])

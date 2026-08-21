@@ -1,7 +1,7 @@
 const SECTIONS = [
     {
         title: '1. Chấp nhận điều khoản',
-        content: ['Khi sử dụng Lặng lẽ 24, bạn đồng ý tuân thủ các điều khoản được quy định tại đây.'],
+        content: ['Khi sử dụng Lặng 24, bạn đồng ý tuân thủ các điều khoản được quy định tại đây.'],
     },
     {
         title: '2. Tài khoản',

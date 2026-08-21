@@ -6,9 +6,13 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { MailService } from '../mail/mail.service';
+import { BadRequestException } from '@nestjs/common/exceptions';
+import { authenticator } from 'otplib';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class AuthService {
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
@@ -20,7 +24,7 @@ export class AuthService {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  private async issueTokens(userId: string, email: string, role: string) {
+  private async issueTokens(userId: number, email: string, role: string) {
     const accessToken = this.jwt.sign(
       { sub: userId, email, role },
       { secret: this.config.get('JWT_ACCESS_SECRET'), expiresIn: '15m' },
@@ -36,7 +40,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private async sendVerification(userId: string, email: string, name: string) {
+  private async sendVerification(userId: number, email: string, name: string) {
     const token = crypto.randomBytes(32).toString('hex');
     await this.prisma.emailVerificationToken.create({
       data: {
@@ -67,6 +71,9 @@ export class AuthService {
     };
   }
 
+  private readonly MAX_ATTEMPTS = 5;
+  private readonly LOCKOUT_MINUTES = 15;
+
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user || !user.passwordHash) {
@@ -74,8 +81,39 @@ export class AuthService {
     }
     if (user.isBanned) throw new ForbiddenException('Tài khoản đã bị khoá');
 
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+      throw new ForbiddenException(`Tài khoản tạm khoá do đăng nhập sai nhiều lần. Thử lại sau ${minutesLeft} phút.`);
+    }
+
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    if (!valid) {
+      const attempts = user.failedLoginAttempts + 1;
+      const shouldLock = attempts >= this.MAX_ATTEMPTS;
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: shouldLock ? 0 : attempts,
+          lockedUntil: shouldLock ? new Date(Date.now() + this.LOCKOUT_MINUTES * 60000) : null,
+        },
+      });
+      if (shouldLock) {
+        throw new ForbiddenException(`Sai mật khẩu quá ${this.MAX_ATTEMPTS} lần. Tài khoản tạm khoá ${this.LOCKOUT_MINUTES} phút.`);
+      }
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await this.prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: 0, lockedUntil: null } });
+    }
+
+    if (user.twoFactorEnabled) {
+      const tempToken = this.jwt.sign(
+        { sub: user.id, stage: '2fa' },
+        { secret: this.config.get('JWT_ACCESS_SECRET'), expiresIn: '5m' },
+      );
+      return { requires2FA: true, tempToken };
+    }
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
     return {
@@ -132,7 +170,7 @@ export class AuthService {
       },
     });
   }
-  async issueTokensForUser(userId: string, email: string, role: string) {
+  async issueTokensForUser(userId: number, email: string, role: string) {
     return this.issueTokens(userId, email, role);
   }
 
@@ -214,10 +252,73 @@ export class AuthService {
     return { success: true };
   }
 
-  async resendVerification(userId: string) {
+  async resendVerification(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.emailVerified) return { success: true };
     await this.sendVerification(user.id, user.email, user.name);
     return { success: true };
+  }
+
+  async changePassword(userId: number, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new BadRequestException('Tài khoản này đăng nhập qua Google/Github, không thể đổi mật khẩu theo cách này');
+    }
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.refreshToken.updateMany({ where: { userId }, data: { revoked: true } }),
+    ]);
+    return { success: true };
+  }
+
+  async setup2FA(userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+
+    const secret = authenticator.generateSecret();
+    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorSecret: secret, twoFactorEnabled: false } });
+
+    const otpauth = authenticator.keyuri(user.email, 'Lặng 24', secret);
+    const qrDataUrl = await QRCode.toDataURL(otpauth);
+    return { qrDataUrl, secret };
+  }
+
+  async confirm2FA(userId: number, code: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.twoFactorSecret) throw new UnauthorizedException('Chưa khởi tạo 2FA');
+    if (!authenticator.check(code, user.twoFactorSecret)) throw new UnauthorizedException('Mã xác thực không đúng');
+    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
+    return { success: true };
+  }
+
+  async disable2FA(userId: number) {
+    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: false, twoFactorSecret: null } });
+    return { success: true };
+  }
+
+  async loginWith2FA(tempToken: string, code: string) {
+    let payload: any;
+    try {
+      payload = this.jwt.verify(tempToken, { secret: this.config.get('JWT_ACCESS_SECRET') });
+    } catch {
+      throw new UnauthorizedException('Phiên xác thực đã hết hạn, vui lòng đăng nhập lại');
+    }
+    if (payload.stage !== '2fa') throw new UnauthorizedException('Token không hợp lệ');
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user?.twoFactorSecret || !authenticator.check(code, user.twoFactorSecret)) {
+      throw new UnauthorizedException('Mã xác thực không đúng');
+    }
+
+    const tokens = await this.issueTokens(user.id, user.email, user.role);
+    return {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatarUrl: user.avatarUrl, emailVerified: user.emailVerified },
+      ...tokens,
+    };
   }
 }

@@ -4,12 +4,13 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { api, setAccessToken, getAccessToken } from '@/lib/api-client';
 
 type User = {
-  id: string;
+  id: number;
   email: string;
   name: string;
   role: 'ADMIN' | 'USER';
   avatarUrl?: string | null;
   emailVerified?: boolean;
+  twoFactorEnabled?: boolean;
   bio?: string | null;
   location?: string | null;
   websiteUrl?: string | null;
@@ -18,10 +19,13 @@ type User = {
   githubUrl?: string | null;
 };
 
+type LoginResult = { requires2FA: boolean; tempToken?: string };
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  verify2FA: (tempToken: string, code: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   loginWithToken: (accessToken: string) => Promise<void>;
@@ -63,8 +67,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string): Promise<LoginResult> {
     const res = await api.post('/auth/login', { email, password });
+    if (res.data.requires2FA) {
+      return { requires2FA: true, tempToken: res.data.tempToken };
+    }
+    setAccessToken(res.data.accessToken);
+    setUser(res.data.user);
+    return { requires2FA: false };
+  }
+
+  async function verify2FA(tempToken: string, code: string) {
+    const res = await api.post('/auth/login/2fa', { tempToken, code });
     setAccessToken(res.data.accessToken);
     setUser(res.data.user);
   }
@@ -81,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  // Dùng cho callback Google OAuth: đã có accessToken, chỉ cần set + load /me
   async function loginWithToken(accessToken: string) {
     setAccessToken(accessToken);
     await loadMe();
@@ -92,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithToken, refreshMe }}>
+    <AuthContext.Provider value={{ user, loading, login, verify2FA, register, logout, loginWithToken, refreshMe }}>
       {children}
     </AuthContext.Provider>
   );

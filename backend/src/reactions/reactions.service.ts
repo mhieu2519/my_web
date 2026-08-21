@@ -4,9 +4,9 @@ import { ToggleReactionDto } from './dto/reaction.dto';
 
 @Injectable()
 export class ReactionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  async summary(postId: string, userId?: string) {
+  async summary(postId: string, userId?: number) {
     const reactions = await this.prisma.reaction.findMany({ where: { postId } });
     const counts: Record<string, number> = {};
     for (const r of reactions) counts[r.type] = (counts[r.type] || 0) + 1;
@@ -16,7 +16,7 @@ export class ReactionsService {
   }
 
   // Bấm lại cùng loại icon -> gỡ; bấm loại khác -> đổi loại; chưa có -> tạo mới
-  async toggle(userId: string, dto: ToggleReactionDto) {
+  async toggle(userId: number, dto: ToggleReactionDto) {
     const existing = await this.prisma.reaction.findUnique({
       where: { postId_userId: { postId: dto.postId, userId } },
     });

@@ -9,8 +9,6 @@ import { slugify } from '@/lib/slugify';
 import { formatCount } from '@/lib/format';
 import { TbLeaf } from "react-icons/tb";
 import { BsBackpack2 } from "react-icons/bs";
-import { LiaCameraRetroSolid } from "react-icons/lia";
-import { IoCafeOutline } from "react-icons/io5";
 import { TiLightbulb } from "react-icons/ti";
 import { HiOutlineDesktopComputer } from "react-icons/hi";
 import { PiLeafDuotone } from "react-icons/pi";
@@ -37,17 +35,7 @@ const TOPICS = [
   {
     label: 'Du ký',
     icon: BsBackpack2,
-    desc: 'Những hành trình đi để trưởng thành'
-  },
-  {
-    label: 'Du lịch',
-    icon: LiaCameraRetroSolid,
-    desc: 'Địa điểm đẹp, trải nghiệm và cẩm nang hữu ích'
-  },
-  {
-    label: 'Đời sống',
-    icon: IoCafeOutline,
-    desc: 'Câu chuyện đời thường, điều nhỏ bé và ý nghĩa'
+    desc: 'Những chuyến đi, địa điểm và hành trình đáng nhớ'
   },
   {
     label: 'Cảm hứng',
@@ -158,7 +146,7 @@ export default async function HomePage({
 
           {/* 2. Danh mục 6 chủ đề hiển thị 6 cột trên màn hình rộng */}
           <section className="mb-12">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {TOPICS.map((t) => (
                 <CategoryCard
                   key={t.label}

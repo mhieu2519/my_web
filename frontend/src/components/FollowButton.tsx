@@ -9,7 +9,7 @@ export default function FollowButton({
     authorId,
     initialCount,
 }: {
-    authorId: string;
+    authorId: number;
     initialCount: number;
 }) {
     const { user } = useAuth();

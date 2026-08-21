@@ -5,7 +5,7 @@ import AdminGuard from '@/components/AdminGuard';
 import { api } from '@/lib/api-client';
 
 type UserRow = {
-    id: string;
+    id: number;
     email: string;
     name: string;
     role: 'ADMIN' | 'USER';

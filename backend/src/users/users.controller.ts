@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Delete, Param, Body, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -31,6 +31,11 @@ class SetPostLimitDto {
   monthlyPostLimit!: number;
 }
 
+class ReassignIdDto {
+  @IsInt() @Min(0)
+  newId!: number;
+}
+
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) { }
@@ -48,45 +53,51 @@ export class UsersController {
     return this.usersService.updateProfile(req.user.userId, dto);
   }
 
-  // Công khai: xem hồ sơ tác giả — nếu đã đăng nhập thì kèm luôn trạng thái đang theo dõi hay chưa
   @UseGuards(OptionalJwtAuthGuard)
   @Get(':id/public')
-  publicProfile(@Param('id') id: string, @Req() req: any) {
+  publicProfile(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     return this.usersService.findPublicProfile(id, req.user?.userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/follow/toggle')
-  toggleFollow(@Req() req: any, @Param('id') id: string) {
+  toggleFollow(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     return this.usersService.toggleFollow(req.user.userId, id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch(':id/role')
-  setRole(@Param('id') id: string, @Body() dto: SetRoleDto) {
+  setRole(@Param('id', ParseIntPipe) id: number, @Body() dto: SetRoleDto) {
     return this.usersService.setRole(id, dto.role);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch(':id/ban')
-  setBanned(@Param('id') id: string, @Body() dto: SetBannedDto) {
+  setBanned(@Param('id', ParseIntPipe) id: number, @Body() dto: SetBannedDto) {
     return this.usersService.setBanned(id, dto.isBanned);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch(':id/post-limit')
-  setPostLimit(@Param('id') id: string, @Body() dto: SetPostLimitDto) {
+  setPostLimit(@Param('id', ParseIntPipe) id: number, @Body() dto: SetPostLimitDto) {
     return this.usersService.setMonthlyPostLimit(id, dto.monthlyPostLimit);
   }
 
+  // Gán lại 1 id còn trống cho tài khoản này
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch(':id/reassign-id')
+  reassignId(@Param('id', ParseIntPipe) id: number, @Body() dto: ReassignIdDto) {
+    return this.usersService.reassignId(id, dto.newId);
+  }
 }

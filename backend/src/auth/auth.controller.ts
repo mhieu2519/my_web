@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Res, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Patch, Get, Body, Res, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
+import { ChangePasswordDto } from './dto/auth.dto';
 
 const REFRESH_COOKIE = 'refresh_token';
 const cookieOptions = {
@@ -36,9 +37,40 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken, user } = await this.authService.login(dto);
+    const result: any = await this.authService.login(dto);
+    if (result.requires2FA) return result;
+    res.cookie(REFRESH_COOKIE, result.refreshToken, cookieOptions);
+    return { accessToken: result.accessToken, user: result.user };
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('login/2fa')
+  async loginWith2FA(
+    @Body('tempToken') tempToken: string,
+    @Body('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken, user } = await this.authService.loginWith2FA(tempToken, code);
     res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions);
     return { accessToken, user };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/setup')
+  setup2FA(@Req() req: any) {
+    return this.authService.setup2FA(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/confirm')
+  confirm2FA(@Req() req: any, @Body('code') code: string) {
+    return this.authService.confirm2FA(req.user.userId, code);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/disable')
+  disable2FA(@Req() req: any) {
+    return this.authService.disable2FA(req.user.userId);
   }
 
   @Get('google')
@@ -94,7 +126,7 @@ export class AuthController {
       where: { id: req.user.userId },
       select: {
         id: true, email: true, name: true, role: true, avatarUrl: true,
-        emailVerified: true, createdAt: true,
+        emailVerified: true, createdAt: true, twoFactorEnabled: true,
         bio: true, location: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, githubUrl: true,
       },
     });
@@ -123,4 +155,12 @@ export class AuthController {
   resendVerification(@Req() req: any) {
     return this.authService.resendVerification(req.user.userId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Patch('change-password')
+  changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(req.user.userId, dto.currentPassword, dto.newPassword);
+  }
+
 }

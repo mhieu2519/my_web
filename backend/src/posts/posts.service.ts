@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import slugify from 'slugify';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { sanitizePostContent, sanitizePlainText } from '../common/sanitize-html.util';
 
 function estimateReadTime(html: string) {
   const text = html.replace(/<[^>]+>/g, ' ');
@@ -20,6 +21,7 @@ function startOfCurrentMonth(): Date {
   return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
 }
 
+const CORE_CATEGORY_SLUGS = ['cong-nghe', 'tho-ca', 'du-ky', 'cam-hung'];
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) { }
@@ -39,7 +41,7 @@ export class PostsService {
   }
 
   private async resolveTags(tagNames: string[] = []) {
-    const tags: { id: string }[] = [];
+    const tags: { id: string; slug: string }[] = [];
     for (const name of tagNames) {
       const slug = slugify(name, { lower: true, strict: true, locale: 'vi' });
       const tag = await this.prisma.tag.upsert({
@@ -47,13 +49,28 @@ export class PostsService {
         update: {},
         create: { name, slug },
       });
-      tags.push({ id: tag.id });
+      tags.push({ id: tag.id, slug: tag.slug });
     }
-    return tags;
+    // Bài không thuộc chuyên mục cốt lõi nào (Công nghệ / Thơ ca / Du ký / Cảm hứng)
+    // -> tự động xếp vào "Cảm hứng" để không bị "mồ côi" chuyên mục.
+    const hasCoreCategory = tags.some((t) => CORE_CATEGORY_SLUGS.includes(t.slug));
+    if (!hasCoreCategory) {
+      const fallback = await this.prisma.tag.upsert({
+        where: { slug: 'cam-hung' },
+        update: {},
+        create: { name: 'Cảm hứng', slug: 'cam-hung' },
+      });
+      if (!tags.some((t) => t.id === fallback.id)) {
+        tags.push({ id: fallback.id, slug: fallback.slug });
+      }
+    }
+
+    return tags.map((t) => ({ id: t.id }));
+
   }
 
   // Số bài đã "gửi duyệt/đăng" trong tháng hiện tại (không tính DRAFT) — tự reset theo tháng
-  async getQuota(userId: string) {
+  async getQuota(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
     if (user.role === 'ADMIN') {
@@ -74,7 +91,7 @@ export class PostsService {
     };
   }
 
-  async create(authorId: string, dto: CreatePostDto, role: string) {
+  async create(authorId: number, dto: CreatePostDto, role: string) {
     let status: CreatePostDto['status'] = dto.status || 'DRAFT';
 
     if (role !== 'ADMIN') {
@@ -98,10 +115,10 @@ export class PostsService {
       data: {
         title: dto.title,
         slug,
-        content: dto.content,
-        excerpt: dto.excerpt,
+        content: sanitizePostContent(dto.content),
+        excerpt: dto.excerpt ? sanitizePlainText(dto.excerpt) : undefined,
         coverImage: dto.coverImage,
-        coverCaption: dto.coverCaption,
+        coverCaption: dto.coverCaption ? sanitizePlainText(dto.coverCaption) : undefined,
         hashtags: dto.hashtags ?? [],
         status,
         publishedAt: status === 'PUBLISHED' ? new Date() : null,
@@ -123,8 +140,8 @@ export class PostsService {
     search?: string,
     sort: 'newest' | 'popular' = 'newest',
     range?: string,
-    authorId?: string,
-    viewerId?: string,
+    authorId?: number,
+    viewerId?: number,
     viewerRole?: string,
   ) {
     const where: any = { status: 'PUBLISHED' };
@@ -234,7 +251,7 @@ export class PostsService {
   }
 
   // Bài của chính user (mọi trạng thái) — dùng cho trang "Bài viết của tôi"
-  async findMine(userId: string, page = 1, pageSize = 10) {
+  async findMine(userId: number, page = 1, pageSize = 10) {
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         where: { authorId: userId },
@@ -248,7 +265,7 @@ export class PostsService {
     return { items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 
-  async findBySlug(slug: string, viewerId?: string, viewerRole?: string) {
+  async findBySlug(slug: string, viewerId?: number, viewerRole?: string) {
     const post = await this.prisma.post.findUnique({
       where: { slug },
       include: {
@@ -296,7 +313,7 @@ export class PostsService {
     return { ...post, prevPost, nextPost };
   }
 
-  async findByIdForEdit(id: string, userId: string, role: string) {
+  async findByIdForEdit(id: string, userId: number, role: string) {
     const post = await this.prisma.post.findUnique({ where: { id }, include: { tags: true } });
     if (!post) throw new NotFoundException('Không tìm thấy bài viết');
     if (post.authorId !== userId && role !== 'ADMIN') {
@@ -305,7 +322,7 @@ export class PostsService {
     return post;
   }
 
-  async update(id: string, userId: string, role: string, dto: UpdatePostDto) {
+  async update(id: string, userId: number, role: string, dto: UpdatePostDto) {
     const post = await this.findByIdForEdit(id, userId, role);
 
     const data: any = { ...dto };
@@ -340,7 +357,9 @@ export class PostsService {
     if (dto.tags) {
       data.tags = { set: [], connect: await this.resolveTags(dto.tags) };
     }
-
+    if (dto.content) data.content = sanitizePostContent(dto.content);
+    if (dto.excerpt) data.excerpt = sanitizePlainText(dto.excerpt);
+    if (dto.coverCaption) data.coverCaption = sanitizePlainText(dto.coverCaption);
     return this.prisma.post.update({
       where: { id },
       data,
@@ -348,7 +367,7 @@ export class PostsService {
     });
   }
 
-  async remove(id: string, userId: string, role: string) {
+  async remove(id: string, userId: number, role: string) {
     await this.findByIdForEdit(id, userId, role);
     await this.prisma.post.delete({ where: { id } });
     return { success: true };

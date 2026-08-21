@@ -27,7 +27,7 @@ export class CommentsService {
     return roots;
   }
 
-  async create(userId: string, dto: CreateCommentDto) {
+  async create(userId: number, dto: CreateCommentDto) {
     const post = await this.prisma.post.findUnique({ where: { id: dto.postId } });
     if (!post) throw new NotFoundException('Không tìm thấy bài viết');
     if (post.commentsEnabled === false) {
@@ -51,7 +51,7 @@ export class CommentsService {
     });
   }
 
-  async update(id: string, userId: string, role: string, dto: UpdateCommentDto) {
+  async update(id: string, userId: number, role: string, dto: UpdateCommentDto) {
     const comment = await this.prisma.comment.findUnique({ where: { id } });
     if (!comment) throw new NotFoundException('Không tìm thấy bình luận');
     if (comment.authorId !== userId && role !== 'ADMIN') {
@@ -60,7 +60,7 @@ export class CommentsService {
     return this.prisma.comment.update({ where: { id }, data: { content: dto.content } });
   }
 
-  async remove(id: string, userId: string, role: string) {
+  async remove(id: string, userId: number, role: string) {
     const comment = await this.prisma.comment.findUnique({ where: { id } });
     if (!comment) throw new NotFoundException('Không tìm thấy bình luận');
     if (comment.authorId !== userId && role !== 'ADMIN') {

@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BookmarksService {
     constructor(private prisma: PrismaService) { }
 
-    async toggle(userId: string, postId: string) {
+    async toggle(userId: number, postId: string) {
         const existing = await this.prisma.bookmark.findUnique({
             where: { userId_postId: { userId, postId } },
         });
@@ -17,12 +17,12 @@ export class BookmarksService {
         return { bookmarked: true };
     }
 
-    async myBookmarkedPostIds(userId: string) {
+    async myBookmarkedPostIds(userId: number) {
         const rows = await this.prisma.bookmark.findMany({ where: { userId }, select: { postId: true } });
         return rows.map((r) => r.postId);
     }
 
-    async myBookmarks(userId: string, page = 1, pageSize = 10) {
+    async myBookmarks(userId: number, page = 1, pageSize = 10) {
         const [rows, total] = await Promise.all([
             this.prisma.bookmark.findMany({
                 where: { userId },

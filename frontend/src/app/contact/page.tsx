@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { PiMapPinLineLight } from "react-icons/pi";
+import { FiPhone } from "react-icons/fi";
+import { RiMailUnreadLine } from "react-icons/ri";
+
 
 const SOCIAL_LINKS = [
     { label: 'Facebook', href: 'https://facebook.com' },
@@ -38,14 +42,14 @@ export default function ContactPage() {
 
                     <div className="space-y-4">
                         <div className="flex items-start gap-3">
-                            <span className="text-xl">📍</span>
+                            <span className="text-xl"><PiMapPinLineLight /></span>
                             <div>
                                 <div className="text-sm font-medium text-gray-800">Địa chỉ</div>
                                 <div className="text-sm text-gray-500">Hà Nội, Việt Nam</div>
                             </div>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="text-xl">📞</span>
+                            <span className="text-xl"><FiPhone /></span>
                             <div>
                                 <div className="text-sm font-medium text-gray-800">Điện thoại</div>
                                 <a href="tel:0900000000" className="text-sm text-brand-600 hover:underline">
@@ -54,7 +58,7 @@ export default function ContactPage() {
                             </div>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="text-xl">✉️</span>
+                            <span className="text-xl"><RiMailUnreadLine /></span>
                             <div>
                                 <div className="text-sm font-medium text-gray-800">Email</div>
                                 <a href="mailto:info@example.com" className="text-sm text-brand-600 hover:underline">

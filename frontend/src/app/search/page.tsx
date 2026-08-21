@@ -32,9 +32,7 @@ function getCategoryIcon(slug: string) {
     const iconClass = "w-4 h-4 text-brand-700 dark:text-brand-300";
     switch (slug) {
         case 'du-ky': return <HiOutlineMapPin className={iconClass} />;
-        case 'du-lich': return <HiOutlineGlobeAsiaAustralia className={iconClass} />;
         case 'cong-nghe': return <HiOutlineCpuChip className={iconClass} />;
-        case 'doi-song': return <HiOutlineHeart className={iconClass} />;
         case 'tho-ca': return <HiOutlineBookOpen className={iconClass} />;
         case 'cam-hung': return <HiOutlineSparkles className={iconClass} />;
         default: return <HiOutlineFolder className={iconClass} />;

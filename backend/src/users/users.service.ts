@@ -15,7 +15,7 @@ export class UsersService {
     });
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: { id: true, email: true, name: true, role: true, avatarUrl: true, createdAt: true },
@@ -25,7 +25,7 @@ export class UsersService {
   }
 
   // Hồ sơ công khai — dùng cho trang /authors/:id
-  async findPublicProfile(id: string, viewerId?: string) {
+  async findPublicProfile(id: number, viewerId?: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -58,7 +58,7 @@ export class UsersService {
     };
   }
 
-  async toggleFollow(followerId: string, followingId: string) {
+  async toggleFollow(followerId: number, followingId: number) {
     if (followerId === followingId) {
       throw new BadRequestException('Không thể tự theo dõi chính mình');
     }
@@ -76,7 +76,7 @@ export class UsersService {
     return { following: true };
   }
 
-  async updateProfile(id: string, data: {
+  async updateProfile(id: number, data: {
     name?: string; avatarUrl?: string; bio?: string; location?: string;
     websiteUrl?: string; facebookUrl?: string; instagramUrl?: string; githubUrl?: string;
   }) {
@@ -90,7 +90,7 @@ export class UsersService {
     });
   }
 
-  async setRole(id: string, role: 'ADMIN' | 'USER') {
+  async setRole(id: number, role: 'ADMIN' | 'USER') {
     return this.prisma.user.update({
       where: { id },
       data: { role },
@@ -98,7 +98,7 @@ export class UsersService {
     });
   }
 
-  async setBanned(id: string, isBanned: boolean) {
+  async setBanned(id: number, isBanned: boolean) {
     return this.prisma.user.update({
       where: { id },
       data: { isBanned },
@@ -106,17 +106,37 @@ export class UsersService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     await this.prisma.user.delete({ where: { id } });
     return { success: true };
   }
 
-  async setMonthlyPostLimit(id: string, limit: number) {
+  async setMonthlyPostLimit(id: number, limit: number) {
     return this.prisma.user.update({
       where: { id },
       data: { monthlyPostLimit: limit },
       select: { id: true, email: true, name: true, monthlyPostLimit: true },
     });
   }
+  // Admin gán lại 1 id (còn trống, do bị xoá/ban trước đó) cho 1 user khác
+  async reassignId(currentId: number, newId: number) {
+    if (newId < 0) throw new BadRequestException('ID không hợp lệ');
+    if (currentId === newId) return this.findById(currentId);
+
+    const target = await this.prisma.user.findUnique({ where: { id: currentId } });
+    if (!target) throw new NotFoundException('Không tìm thấy người dùng');
+
+    const clash = await this.prisma.user.findUnique({ where: { id: newId } });
+    if (clash) throw new BadRequestException(`ID ${newId} đang được sử dụng bởi tài khoản khác`);
+
+    const updated = await this.prisma.user.update({ where: { id: currentId }, data: { id: newId } });
+
+    // Tránh sequence tự tăng sau này va vào id vừa gán thủ công
+    await this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"User"', 'id'), (SELECT MAX(id) FROM "User"))`;
+
+    return { id: updated.id, email: updated.email, name: updated.name };
+  }
+
 }
+
 

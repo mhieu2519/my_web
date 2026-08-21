@@ -8,6 +8,13 @@ import PostEditor from '@/components/PostEditor';
 import { slugify } from '@/lib/slugify';
 import { cldOptimize } from '@/lib/cloudinary';
 import { useAuth } from '@/hooks/useAuth';
+import { MdOutlineCloudUpload } from "react-icons/md";
+import { BiMailSend } from "react-icons/bi";
+import { CiImageOn } from "react-icons/ci";
+import { IoImagesOutline } from "react-icons/io5";
+import { FcLock } from "react-icons/fc";
+import { FcComments } from "react-icons/fc";
+import { FcRating } from "react-icons/fc";
 
 type TagRow = { id: string; name: string; slug: string };
 
@@ -244,7 +251,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               onDragOver={(e) => e.preventDefault()}
               className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-brand-700 rounded-xl2 py-10 cursor-pointer hover:border-brand-300 transition-colors"
             >
-              <span className="text-3xl">🖼️</span>
+              <span className="text-3xl"> <IoImagesOutline /></span>
               <span className="text-sm text-gray-500 dark:text-gray-400">Kéo &amp; thả ảnh vào đây</span>
               <span className="text-xs text-brand-600 dark:text-brand-300 font-medium">hoặc chọn ảnh từ máy tính</span>
               <span className="text-xs text-gray-400">Định dạng: JPG, PNG, WebP (Tối đa 5MB)</span>
@@ -267,17 +274,27 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Thiết lập khác</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-              Cho phép bình luận
+
+              <span className="flex items-center gap-2">
+                <FcComments className="text-base" />
+                <span>Cho phép bình luận</span>
+              </span>
               <input type="checkbox" checked={commentsEnabled} onChange={(e) => setCommentsEnabled(e.target.checked)} className="w-5 h-5 accent-brand-500" />
             </label>
             {isAdmin && (
               <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                Đặt làm bài viết nổi bật
+                <span className="flex items-center gap-2">
+                  <FcRating className="text-base" />
+                  <span>Đặt làm bài viết nổi bật</span>
+                </span>
                 <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="w-5 h-5 accent-brand-500" />
               </label>
             )}
             <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-              🔒 Bài viết riêng tư
+              <span className="flex items-center gap-2">
+                <FcLock className="text-base" />
+                <span>Bài viết riêng tư</span>
+              </span>
               <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="w-5 h-5 accent-brand-500" />
             </label>
           </div>
@@ -310,9 +327,19 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           <button
             onClick={() => handleSubmit(isAdmin ? 'PUBLISHED' : 'PENDING')}
             disabled={submitting || (!isAdmin && !!quota && !quota.unlimited && quota.remaining <= 0)}
-            className="btn-primary w-full text-sm"
+            className="btn-primary w-full text-sm inline-flex items-center justify-center gap-1.5"
           >
-            {submitting ? 'Đang xử lý...' : isAdmin ? '📤 Đăng bài' : '📨 Gửi duyệt'}
+            {submitting ? (
+              'Đang xử lý...'
+            ) : isAdmin ? (
+              <>
+                <MdOutlineCloudUpload className="text-base" /> Đăng bài
+              </>
+            ) : (
+              <>
+                <BiMailSend className="text-base" /> Gửi duyệt
+              </>
+            )}
           </button>
           <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 space-y-1.5">
             <p>Trạng thái: <span className="font-medium text-gray-700 dark:text-gray-200">

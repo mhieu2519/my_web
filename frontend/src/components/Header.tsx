@@ -24,8 +24,6 @@ const NAV_LINKS = [
   { label: 'Công nghệ', href: `/tags/${slugify('Công nghệ')}` },
   { label: 'Thơ ca', href: `/tags/${slugify('Thơ ca')}` },
   { label: 'Du ký', href: `/tags/${slugify('Du ký')}` },
-  { label: 'Du lịch', href: `/tags/${slugify('Du lịch')}` },
-  { label: 'Đời sống', href: `/tags/${slugify('Đời sống')}` },
   { label: 'Cảm hứng', href: `/tags/${slugify('Cảm hứng')}` },
 ];
 
@@ -149,22 +147,6 @@ export default function Header() {
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-500 dark:text-gray-400"
                 >
                   Du ký
-                </Link>
-
-                <Link
-                  href={`/tags/${slugify('Du lịch')}`}
-                  onClick={() => setOpenSmallMenu(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-500 dark:text-gray-400"
-                >
-                  Du lịch
-                </Link>
-
-                <Link
-                  href={`/tags/${slugify('Đời sống')}`}
-                  onClick={() => setOpenSmallMenu(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-500 dark:text-gray-400"
-                >
-                  Đời sống
                 </Link>
 
                 <Link
