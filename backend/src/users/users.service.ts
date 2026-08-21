@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private uploadService: UploadService,
+  ) { }
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -80,7 +84,9 @@ export class UsersService {
     name?: string; avatarUrl?: string; bio?: string; location?: string;
     websiteUrl?: string; facebookUrl?: string; instagramUrl?: string; githubUrl?: string;
   }) {
-    return this.prisma.user.update({
+    const existing = await this.prisma.user.findUnique({ where: { id }, select: { avatarUrl: true } });
+
+    const updated = await this.prisma.user.update({
       where: { id },
       data,
       select: {
@@ -88,8 +94,14 @@ export class UsersService {
         bio: true, location: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, githubUrl: true,
       },
     });
-  }
 
+    // Đổi avatar -> dọn ảnh cũ trên Cloudinary (chạy nền, không chặn response)
+    if (data.avatarUrl !== undefined && existing?.avatarUrl && existing.avatarUrl !== data.avatarUrl) {
+      this.uploadService.deleteImage(existing.avatarUrl).catch(() => { });
+    }
+
+    return updated;
+  }
   async setRole(id: number, role: 'ADMIN' | 'USER') {
     return this.prisma.user.update({
       where: { id },

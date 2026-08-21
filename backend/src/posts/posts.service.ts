@@ -3,6 +3,8 @@ import slugify from 'slugify';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { sanitizePostContent, sanitizePlainText } from '../common/sanitize-html.util';
+import { UploadService } from '../upload/upload.service';
+import { extractImageSrcs } from '../common/cloudinary.util';
 
 function estimateReadTime(html: string) {
   const text = html.replace(/<[^>]+>/g, ' ');
@@ -24,7 +26,18 @@ function startOfCurrentMonth(): Date {
 const CORE_CATEGORY_SLUGS = ['cong-nghe', 'tho-ca', 'du-ky', 'cam-hung'];
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private uploadService: UploadService,
+  ) { }
+
+  // Gom toàn bộ URL ảnh đang thuộc về 1 bài viết (cover + ảnh trong content)
+  private collectPostImageUrls(post: { coverImage?: string | null; content?: string | null }): string[] {
+    const urls = new Set<string>();
+    if (post.coverImage) urls.add(post.coverImage);
+    for (const src of extractImageSrcs(post.content)) urls.add(src);
+    return Array.from(urls);
+  }
 
   private async generateUniqueSlug(base: string, excludeId?: string) {
     const baseSlug = slugify(base, { lower: true, strict: true, locale: 'vi' });
@@ -360,16 +373,31 @@ export class PostsService {
     if (dto.content) data.content = sanitizePostContent(dto.content);
     if (dto.excerpt) data.excerpt = sanitizePlainText(dto.excerpt);
     if (dto.coverCaption) data.coverCaption = sanitizePlainText(dto.coverCaption);
-    return this.prisma.post.update({
+
+
+    const updated = await this.prisma.post.update({
       where: { id },
       data,
       include: { tags: true, author: { select: { id: true, name: true, avatarUrl: true } } },
     });
+
+    // Ảnh nào KHÔNG còn xuất hiện trong bài sau khi sửa -> xoá khỏi Cloudinary
+    const oldUrls = this.collectPostImageUrls(post);
+    const newUrls = this.collectPostImageUrls({ coverImage: updated.coverImage, content: updated.content });
+    const removedUrls = oldUrls.filter((u) => !newUrls.includes(u));
+    Promise.all(removedUrls.map((u) => this.uploadService.deleteImage(u))).catch(() => { });
+
+    return updated;
   }
 
   async remove(id: string, userId: number, role: string) {
-    await this.findByIdForEdit(id, userId, role);
+    const post = await this.findByIdForEdit(id, userId, role);
     await this.prisma.post.delete({ where: { id } });
+
+    // Dọn toàn bộ ảnh của bài trên Cloudinary (chạy nền)
+    const urls = this.collectPostImageUrls(post);
+    Promise.all(urls.map((u) => this.uploadService.deleteImage(u))).catch(() => { });
+
     return { success: true };
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
+import { extractCloudinaryPublicId } from '../common/cloudinary.util';
 import 'multer';
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -37,4 +38,16 @@ export class UploadService {
       stream.end(file.buffer);
     });
   }
+
+  async deleteImage(url?: string | null) {
+    const publicId = extractCloudinaryPublicId(url);
+    if (!publicId) return;
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    } catch (err) {
+      // Không throw — xoá ảnh cloud là tác vụ dọn dẹp phụ, lỗi ở đây không nên làm fail request chính
+      console.error(`Xoá ảnh Cloudinary thất bại (${publicId}):`, err);
+    }
+  }
+
 }

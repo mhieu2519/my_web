@@ -6,6 +6,10 @@ import ImageExtension from '@tiptap/extension-image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { uploadToCloudinary } from '@/lib/upload';
 import { ImageGallery } from '@/components/tiptap/ImageGalleryExtension';
+import { FcList } from "react-icons/fc";
+import { FcRules } from "react-icons/fc";
+import { CiImageOn } from "react-icons/ci";
+import { PiImagesThin } from "react-icons/pi";
 
 export default function PostEditor({
   content,
@@ -89,7 +93,7 @@ export default function PostEditor({
           active={editor.isActive('heading', { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
-          📑 Đầu mục (H2)
+          <FcList />
         </ToolbarBtn>
         <ToolbarBtn
           active={editor.isActive('bulletList')}
@@ -106,8 +110,20 @@ export default function PostEditor({
         <ToolbarBtn active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
           " Quote
         </ToolbarBtn>
-        <ToolbarBtn onClick={() => fileInputRef.current?.click()}>🖼 Ảnh</ToolbarBtn>
-        <ToolbarBtn onClick={() => galleryInputRef.current?.click()}>🖼️🖼️ Bộ ảnh</ToolbarBtn>
+        <ToolbarBtn onClick={() => fileInputRef.current?.click()}>
+          <div className="flex items-center gap-1.5 text-sm ">
+            <CiImageOn />
+            Ảnh
+          </div>
+
+        </ToolbarBtn>
+        <ToolbarBtn onClick={() => galleryInputRef.current?.click()}>
+          <div className="flex items-center gap-1.5 text-sm ">
+            <PiImagesThin />
+
+            Bộ ảnh
+          </div>
+        </ToolbarBtn>
         <input
           ref={fileInputRef}
           type="file"
@@ -134,12 +150,12 @@ export default function PostEditor({
       <EditorContent editor={editor} />
 
       <div className="mt-3 border-2 border-dashed border-brand-100 rounded-xl px-4 py-3 bg-brand-50/30">
-        <p className="text-xs font-semibold text-gray-600 mb-1.5">
-          📑 Mục lục xem trước (tự sinh từ các đầu mục H2)
+        <p className="flex items-center text-xs font-semibold text-gray-600 mb-1.5">
+          <FcRules className="mr-2" /> Mục lục xem trước
         </p>
         {outline.length === 0 ? (
-          <p className="text-xs text-gray-400">
-            Chưa có đầu mục nào. Bôi đen dòng tiêu đề phần rồi bấm nút "📑 Đầu mục (H2)" ở trên để thêm vào mục lục.
+          <p className="flex items-center text-xs text-gray-400">
+            Chưa có đầu mục nào. Bôi đen dòng tiêu đề phần rồi bấm nút <FcList className="mx-1" /> ở trên để thêm vào mục lục.
           </p>
         ) : (
           <ol className="text-xs text-gray-600 space-y-0.5 list-decimal list-inside">
