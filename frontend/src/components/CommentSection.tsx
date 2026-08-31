@@ -122,7 +122,7 @@ export default function CommentSection({ postId }: { postId: string }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Viết bình luận của bạn..."
-            className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
+            className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
           />
           <button onClick={submitComment} disabled={submitting} className="btn-primary">
             Gửi

@@ -68,7 +68,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-white/70 dark:bg-brand-900/75 backdrop-blur-[2px]" />
 
         <div className="relative z-10 w-full max-w-md">
-          <div className="card p-8">
+          <div className="card p-8 bg-transparent">
             {step === 'password' ? (
               <>
                 <h1 className="text-2xl font-bold mb-1 heading-gradient inline-block">Chào mừng quay trở lại!</h1>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
+                      className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                     />
                   </div>
                   <div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 pr-11 focus:border-brand-400 focus:outline-none transition-colors"
+                        className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 pr-11 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                       />
                       <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="Hiện/ẩn mật khẩu">
                         {showPassword ? <IoEyeOffOutline size={18} /> : <IoEyeOutline size={18} />}
@@ -177,7 +177,7 @@ export default function LoginPage() {
             )}
           </div>
 
-          <div className="card mt-6 p-5 text-center">
+          <div className="card mt-6 p-5 text-center bg-transparent">
             <p className="italic text-gray-600 dark:text-gray-300">
               "Những điều đẹp nhất thường bắt đầu từ những điều rất nhỏ bé."
             </p>

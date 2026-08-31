@@ -182,7 +182,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
       <div className="space-y-5 min-w-0">
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <div className="flex items-center justify-end mb-1">
             <span className="text-xs text-gray-400">{title.length}/120</span>
           </div>
@@ -190,7 +190,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
             value={title}
             onChange={(e) => setTitle(e.target.value.slice(0, 120))}
             placeholder="Nhập tiêu đề bài viết..."
-            className="w-full text-xl font-display font-bold border-none focus:outline-none placeholder:text-gray-300 dark:bg-transparent dark:text-white"
+            className="w-full text-xl font-display font-bold border-none focus:outline-none placeholder:text-gray-300 dark:bg-transparent dark:text-white bg-transparent"
           />
           <div className="flex items-center gap-2 mt-2 text-xs text-gray-400 flex-wrap">
             <span>Đường dẫn: {SITE_URL}/posts/</span>
@@ -211,7 +211,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           </div>
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <PostEditor content={content} onChange={setContent} />
           <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
             <span>Số từ: {wordCount}</span>
@@ -226,7 +226,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           </div>
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Ảnh đại diện</h3>
           {coverImage ? (
             <div className="relative">
@@ -239,7 +239,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
                 <button
                   type="button"
                   onClick={() => setCoverImage('')}
-                  className="bg-white/90 dark:bg-brand-900/80 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                  className="bg-white/90 dark:bg-brand-900/80 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors bg-transparent"
                 >
                   🗑 Xoá
                 </button>
@@ -249,7 +249,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
             <label
               onDrop={handleCoverDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-brand-700 rounded-xl2 py-10 cursor-pointer hover:border-brand-300 transition-colors"
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-brand-700 rounded-xl2 py-10 cursor-pointer hover:border-brand-300 transition-colors bg-transparent"
             >
               <span className="text-3xl"> <IoImagesOutline /></span>
               <span className="text-sm text-gray-500 dark:text-gray-400">Kéo &amp; thả ảnh vào đây</span>
@@ -266,11 +266,11 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
             value={coverCaption}
             onChange={(e) => setCoverCaption(e.target.value)}
             placeholder="VD: Một buổi sáng bình yên tại đèo Mã Pí Lèng..."
-            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none bg-transparent"
           />
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Thiết lập khác</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
@@ -307,7 +307,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
       </div>
 
       <div className="space-y-5">
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
             {isAdmin ? 'Đăng bài' : 'Gửi bài viết'}
           </h3>
@@ -321,7 +321,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               Lưu nháp
             </button>
             <button type="button" onClick={() => setShowPreview(true)} className="btn-outline flex-1 text-sm">
-              👁 Xem trước
+              👁 Xem
             </button>
           </div>
           <button
@@ -352,7 +352,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
         </div>
 
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Chuyên mục</h3>
           <div className="space-y-2">
             {allTags.map((t) => (
@@ -365,7 +365,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
           </div>
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Thẻ (Tags)</h3>
           <div className="flex flex-wrap gap-2 mb-2">
             {extraTags.map((t) => (
@@ -385,11 +385,11 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               }
             }}
             placeholder="Nhập thẻ và nhấn Enter..."
-            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none bg-transparent"
           />
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Hashtag (hiển thị cuối bài)</h3>
           <div className="flex flex-wrap gap-2 mb-2">
             {hashtags.map((t) => (
@@ -409,11 +409,11 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
               }
             }}
             placeholder="VD: hagiang, dulky, travel..."
-            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none bg-transparent"
           />
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 bg-transparent">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Tóm tắt bài viết</h3>
             <span className="text-xs text-gray-400">{excerpt.length}/200</span>
@@ -423,7 +423,7 @@ export default function PostForm({ initial }: { initial?: InitialData }) {
             onChange={(e) => setExcerpt(e.target.value.slice(0, 200))}
             rows={4}
             placeholder="Viết một đoạn tóm tắt ngắn gọn về bài viết..."
-            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none resize-none"
+            className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none resize-none bg-transparent"
           />
         </div>
       </div>

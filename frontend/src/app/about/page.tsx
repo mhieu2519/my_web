@@ -21,7 +21,7 @@ export default function AboutPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-900/60 via-transparent to-transparent" />
                     <div className="relative z-10 max-w-2xl px-6">
                         <motion.h1
-                            className="text-white text-4xl md:text-5xl font-extrabold drop-shadow-lg min-h-[120px] flex items-center justify-center"
+                            className="text-white text-4xl md:text-5xl font-display drop-shadow-lg min-h-[120px] flex items-center justify-center"
                             initial={{ y: -40, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ duration: 0.8 }}
@@ -74,13 +74,13 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
 
                     {/* Writing journey */}
                     <motion.section
-                        className="card p-8 mb-12"
+                        className="card p-8 mb-12 bg-transparent"
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                         viewport={{ once: true }}
                     >
-                        <h3 className="text-xl font-bold mb-5 text-center">📜 Hành trình viết lách</h3>
+                        <h3 className="text-xl font-bold font-display mb-5 text-center">📜 Hành trình viết lách</h3>
                         <ul className="space-y-3">
                             {[
                                 ['2013', 'Những bài viết đầu tiên được biết đến và ghi nhận'],
@@ -99,7 +99,7 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
 
                     {/* Places */}
                     <motion.section
-                        className="card p-8 mb-12 text-center"
+                        className="card p-8 mb-12 text-center bg-transparent"
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
@@ -120,7 +120,7 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
 
                     {/* Music */}
                     <motion.section
-                        className="card p-8 mb-12 text-center"
+                        className="card p-8 mb-12 text-center bg-transparent"
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
@@ -159,13 +159,13 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
                     </div>
                 </section>
 
-                <div className="max-w-3xl mx-auto px-4">
+                <div className="max-w-3xl mx-auto px-4 ">
                     {/* Categories */}
-                    <section className="mb-16">
-                        <h3 className="text-2xl font-bold text-center mb-8 heading-gradient inline-block w-full">
+                    <section className="mb-16 ">
+                        <h3 className="text-2xl font-bold text-center mb-8 heading-gradient inline-block w-full ">
                             Mình thường viết về
                         </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 ">
                             {[
                                 ['📖', 'Văn học', 'Cảm nhận, trích đoạn, tác phẩm yêu thích'],
                                 ['✈️', 'Du lịch', 'Ký sự rong chơi, những góc nhìn mới'],
@@ -173,7 +173,7 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
                             ].map(([icon, title, desc], i) => (
                                 <motion.div
                                     key={title}
-                                    className="card p-6 text-center"
+                                    className="card p-6 text-center bg-transparent"
                                     initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -187,7 +187,7 @@ Cảm ơn vì đã theo dõi câu chuyện của tôi.`}
                         </div>
                     </section>
 
-                    <footer className="text-center text-brand-600 font-semibold py-6">
+                    <footer className="text-center text-brand-600 font-display py-6">
                         ~ Lưu lại những điều đẹp đẽ bằng con chữ ~
                     </footer>
                 </div>

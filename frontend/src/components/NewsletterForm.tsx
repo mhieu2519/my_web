@@ -32,7 +32,7 @@ export default function NewsletterForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email của bạn"
-                className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-900 rounded-full px-4 py-2 text-sm focus:border-brand-400 focus:outline-none transition-colors"
+                className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-900 rounded-full px-4 py-2 text-sm focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
             />
             <button type="submit" disabled={status === 'submitting'} className="btn-primary w-full text-sm">
                 {status === 'submitting' ? 'Đang gửi...' : 'Đăng ký ngay'}

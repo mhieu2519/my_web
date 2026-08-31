@@ -56,18 +56,22 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-white/70 dark:bg-brand-900/75 backdrop-blur-[2px]" />
 
         <div className="relative z-10 w-full max-w-md">
-          <div className="card p-8">
+          <div className="card p-8 bg-transparent">
             <h1 className="text-2xl font-bold mb-1 heading-gradient inline-block">Tạo tài khoản mới 🌿</h1>
             <p className="text-sm text-gray-400 mb-6">Tham gia cộng đồng Lặng 24 ngay hôm nay</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-200">Họ và tên</label>
-                <input required value={name} onChange={(e) => setName(e.target.value)} className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors" />
+                <input required value={name} onChange={(e) => setName(e.target.value)} className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-200">Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors" />
+                <input
+                  type="email"
+                  required value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-200">Mật khẩu (tối thiểu 8 ký tự)</label>
@@ -78,7 +82,7 @@ export default function RegisterPage() {
                     minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 pr-11 focus:border-brand-400 focus:outline-none transition-colors"
+                    className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 pr-11 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                   />
                   <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="Hiện/ẩn mật khẩu">
                     {showPassword ? <IoEyeOffOutline size={18} /> : <IoEyeOutline size={18} />}
@@ -93,7 +97,7 @@ export default function RegisterPage() {
                   minLength={8}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
+                  className="w-full border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                 />
               </div>
 

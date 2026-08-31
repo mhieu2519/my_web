@@ -11,7 +11,7 @@ import { formatCount } from '@/lib/format';
 import { slugify } from '@/lib/slugify';
 import { cldOptimize } from '@/lib/cloudinary';
 
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 const PLACEHOLDER_IMG = '/images/slide3.png';
 const PAGE_SIZE = 6;
 
@@ -140,7 +140,7 @@ export default async function AuthorPage({
 
                     <div className="pb-3">
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h1 className="text-2xl font-display text-gray-900 dark:text-white">
                                 {profile.name}
                             </h1>
                             {profile.role === 'ADMIN' && (
@@ -171,7 +171,7 @@ export default async function AuthorPage({
                         />
                         <div>
                             <div className="flex items-center gap-1.5">
-                                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
+                                <h1 className="text-xl font-display  text-gray-900 dark:text-white">{profile.name}</h1>
                                 {profile.role === 'ADMIN' && <IoCheckmarkCircle className="text-brand-500 shrink-0" size={18} />}
                             </div>
                             <span className="mt-1 inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
@@ -181,8 +181,8 @@ export default async function AuthorPage({
                     </div>
 
                     {/* Dòng Bio (Trích dẫn/Thơ) */}
-                    <div className="text-gray-700 dark:text-gray-300 text-sm md:text-base leading-relaxed italic max-w-md">
-                        <p>“ Viết để ghi nhớ, đi để trưởng thành.</p>
+                    <div className=" font-display text-gray-700 dark:text-gray-300 text-sm md:text-base leading-relaxed italic max-w-md">
+                        <p> Viết để ghi nhớ, đi để trưởng thành.</p>
                         <p className="mt-0.5">Yêu công nghệ, thích du lịch và những điều đẹp đẽ.</p>
                     </div>
 
@@ -263,7 +263,7 @@ export default async function AuthorPage({
                 <div className="flex flex-wrap gap-2 mb-6">
                     <Link
                         href={tabHref('')}
-                        className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${!activeTag ? 'bg-brand-gradient text-white' : 'bg-white dark:bg-brand-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-brand-700 hover:border-brand-300'}`}
+                        className={`text-sm font-display px-4 py-1.5 rounded-full transition-colors ${!activeTag ? 'bg-brand-gradient text-white' : 'bg-transparent dark:bg-brand-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-brand-700 hover:border-brand-300'}`}
                     >
                         Mới nhất
                     </Link>
@@ -271,7 +271,7 @@ export default async function AuthorPage({
                         <Link
                             key={t.tag}
                             href={tabHref(t.tag)}
-                            className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${activeTag === t.tag ? 'bg-brand-gradient text-white' : 'bg-white dark:bg-brand-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-brand-700 hover:border-brand-300'}`}
+                            className={`text-sm font-display px-4 py-1.5 rounded-full transition-colors ${activeTag === t.tag ? 'bg-brand-gradient text-white' : 'bg-transparent dark:bg-brand-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-brand-700 hover:border-brand-300'}`}
                         >
                             {t.label}
                         </Link>
@@ -283,9 +283,9 @@ export default async function AuthorPage({
             </div>
 
             {/* Khối thông tin Về Lặng 24 */}
-            <div className="card bg-brand-gradient-soft dark:bg-brand-800/40 p-8 mt-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="card bg-brand-gradient-soft dark:bg-brand-800/40 p-8 mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-transparent ">
                 <div>
-                    <h3 className="font-bold text-gray-800 dark:text-gray-100">Về Lặng 24</h3>
+                    <h3 className="font-script text-xl text-gray-800 dark:text-gray-100">Về Lặng 24</h3>
                     <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm max-w-sm">
                         "Lặng 24" là góc nhỏ mình tạo nên để chia sẻ những hành trình, những dòng chữ và cảm hứng mỗi ngày.
                         Cảm ơn bạn đã ghé qua và đồng hành cùng mình!

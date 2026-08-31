@@ -37,7 +37,7 @@ export default function ContactPage() {
 
             <div className="grid md:grid-cols-2 gap-6 mb-10">
                 {/* Contact info */}
-                <div className="card p-8 space-y-6">
+                <div className="card p-8 space-y-6 bg-transparent">
                     <h2 className="text-xl font-bold">Thông tin liên hệ</h2>
 
                     <div className="space-y-4">
@@ -87,7 +87,7 @@ export default function ContactPage() {
                 </div>
 
                 {/* Contact form */}
-                <div className="card p-8">
+                <div className="card p-8 bg-transparent">
                     <h2 className="text-xl font-bold mb-5">Gửi lời nhắn</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
@@ -96,7 +96,7 @@ export default function ContactPage() {
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                             />
                         </div>
                         <div>
@@ -106,7 +106,7 @@ export default function ContactPage() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors"
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent"
                             />
                         </div>
                         <div>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                                 rows={5}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors resize-none"
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors resize-none bg-transparent"
                             />
                         </div>
                         <button type="submit" className="btn-primary w-full">

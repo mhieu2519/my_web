@@ -143,10 +143,26 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
     post.author.githubUrl && { href: post.author.githubUrl, icon: FaGithub, label: 'Github' },
   ].filter(Boolean) as { href: string; icon: any; label: string }[];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    image: post.coverImage ? [post.coverImage] : undefined,
+    datePublished: post.publishedAt,
+    dateModified: post.publishedAt,
+    author: { '@type': 'Person', name: post.author.name },
+    mainEntityOfPage: `${SITE_URL}/posts/${post.slug}`,
+  };
+
   return (
     //<div className="-mx-4 md:-mx-[calc((64rem-48rem)/2)] overflow-x-hidden">
     //<div className=" overflow-x-hidden">
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-5xl mx-auto px-4">
         <nav className="text-sm text-gray-400 mb-6 flex items-center gap-1.5 flex-wrap">
           <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-300">Trang chủ</Link>
@@ -287,7 +303,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
           </article>
 
           <aside className="space-y-6">
-            <div className="card p-5 lg:sticky lg:top-24">
+            <div className="card p-5 lg:sticky lg:top-24 bg-transparent">
               <h3 className="font-bold text-sm mb-3 text-gray-800 dark:text-gray-100">Tác giả</h3>
               <div className="flex items-center gap-3">
                 {post.author.avatarUrl ? (
@@ -338,7 +354,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
             {headings.length > 0 && <TableOfContents headings={headings} />}
 
             {related.length > 0 && (
-              <div className="card p-5">
+              <div className="card p-5 bg-transparent">
                 <h3 className="font-bold text-sm mb-3 text-gray-800 dark:text-gray-100">Bài viết liên quan</h3>
                 <div className="space-y-3">
                   {related.map((r) => (

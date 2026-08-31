@@ -15,8 +15,14 @@ import {
     HiOutlineBookOpen,
     HiOutlineSparkles
 } from 'react-icons/hi2';
+import type { Metadata } from 'next';
 
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+export const metadata: Metadata = {
+    title: 'Tìm kiếm — Lặng 24',
+    robots: { index: false, follow: true },
+};
+
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 const PAGE_SIZE = 6;
 
 const TIME_RANGES = [
@@ -165,7 +171,7 @@ export default async function SearchPage({
             <div className="grid lg:grid-cols-[260px_1fr_320px] gap-8">
                 {/* 2. Cột Bộ lọc bên trái */}
                 <aside className="space-y-6">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="bg-transparent dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm bg-transparent">
                         <h3 className="font-bold text-base mb-4 text-gray-900 dark:text-gray-100">Bộ lọc</h3>
 
                         {/* Chuyên mục */}
@@ -246,7 +252,7 @@ export default async function SearchPage({
                 {/* 4. Cột bên phải (Sidebar phải) */}
                 <aside className="space-y-6">
                     {/* Tìm kiếm phổ biến */}
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="bg-transparent dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3 className="font-bold text-base mb-3 text-gray-900 dark:text-gray-100">Tìm kiếm phổ biến</h3>
                         <div className="flex flex-wrap gap-2">
                             {popularTags.map((t) => (
@@ -263,7 +269,7 @@ export default async function SearchPage({
                     </div>
 
                     {/* Bài viết nổi bật */}
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="bg-transparent dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3 className="font-bold text-base mb-4 text-gray-900 dark:text-gray-100">Bài viết nổi bật</h3>
                         <div className="space-y-4">
                             {popular.length === 0 && <p className="text-sm text-gray-400">Chưa có dữ liệu.</p>}
@@ -290,7 +296,7 @@ export default async function SearchPage({
                         </div>
                     </div>
 
-                    <div className="card p-5">
+                    <div className="card p-5 bg-transparent">
                         <div className="flex items-start gap-3 mb-4">
                             <div className="relative w-20 h-20 shrink-0 -rotate-6 transition-transform duration-300 hover:rotate-0">
                                 <Image

@@ -16,8 +16,14 @@ import { FaRegHeart } from "react-icons/fa";
 import { GoPencil } from "react-icons/go";
 import { TbPoint } from "react-icons/tb";
 
+import type { Metadata } from 'next';
+export const metadata: Metadata = {
+  title: 'Lặng 24',
+  description: 'Một góc nhỏ để chậm lại, viết ra những điều tử tế, chia sẻ hành trình và lan tỏa cảm hứng mỗi ngày.',
+  alternates: { canonical: process.env.NEXT_PUBLIC_SITE_URL },
+};
 
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 const PAGE_SIZE = 8;
 
 
@@ -25,22 +31,26 @@ const TOPICS = [
   {
     label: 'Công nghệ',
     icon: HiOutlineDesktopComputer,
-    desc: 'Chia sẻ kiến thức, thủ thuật và xu hướng mới nhất'
+    desc: 'Kiến thức, thủ thuật và xu hướng mới nhất',
+    image: '/images/congnghe.png'
   },
   {
     label: 'Thơ ca',
     icon: TbLeaf,
-    desc: 'Những vần thơ lặng lẽ, chạm đến cảm xúc'
+    desc: 'Những vần thơ lặng lẽ, chạm đến cảm xúc',
+    image: '/images/thoca.png'
   },
   {
     label: 'Du ký',
     icon: BsBackpack2,
-    desc: 'Những chuyến đi, địa điểm và hành trình đáng nhớ'
+    desc: 'Những chuyến đi và hành trình đáng nhớ',
+    image: '/images/duky.png'
   },
   {
     label: 'Cảm hứng',
     icon: TiLightbulb,
-    desc: 'Nguồn năng lượng tích cực cho mỗi ngày'
+    desc: 'Nguồn năng lượng tích cực cho mỗi ngày',
+    image: '/images/camhung.png'
   },
 ];
 
@@ -116,7 +126,7 @@ export default async function HomePage({
             </div>
 
             <div className="md:col-span-5 flex flex-col justify-center pl-0 md:pl-2">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+              <p className="text-sm font-display text-xl text-gray-600 dark:text-gray-300 mb-2">
                 Chào mừng bạn đến với
               </p>
               <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
@@ -137,14 +147,14 @@ export default async function HomePage({
               </div>
 
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-gray-600 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-4">
-                <span className="flex items-center gap-1.5"><GoPencil /> Bài viết chất lượng</span>
-                <span className="flex items-center gap-1.5"><PiLeafDuotone /> Nội dung đa dạng</span>
+                <span className="flex items-center gap-1.5"><GoPencil /> Chất lượng</span>
+                <span className="flex items-center gap-1.5"><PiLeafDuotone /> Đa dạng</span>
                 <span className="flex items-center gap-1.5"><FaRegHeart /> Truyền cảm hứng</span>
               </div>
             </div>
           </section>
 
-          {/* 2. Danh mục 6 chủ đề hiển thị 6 cột trên màn hình rộng */}
+          {/* 2. Danh mục chủ đề hiển thị cột trên màn hình rộng */}
           <section className="mb-12">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {TOPICS.map((t) => (
@@ -154,7 +164,7 @@ export default async function HomePage({
                   title={t.label}
                   description={t.desc}
                   href={`/tags/${slugify(t.label)}`}
-                  imageSrc={PLACEHOLDER_IMG}
+                  imageSrc={t.image}
                 />
               ))}
             </div>
@@ -164,11 +174,11 @@ export default async function HomePage({
           <section className="mb-12 rounded-2xl overflow-hidden relative shadow-sm h-[140px] md:h-[160px]"> {/* Cần chiều cao cố định */}
             {/* Ảnh nền */}
             <Image
-              src="/images/anh1.png" // Đường dẫn đến ảnh của bạn trong thư mục public
+              src="/images/anh1.png"
               alt="Quote background"
               fill
               sizes="100vw"
-              className="object-cover" // Giúp ảnh cover toàn bộ diện tích
+              className="object-cover"
               priority // Đặt là priority nếu phần này nằm trong màn hình đầu tiên
             />
 
@@ -180,7 +190,7 @@ export default async function HomePage({
               <p className="text-lg md:text-2xl font-display italic text-gray-900 dark:text-white leading-relaxed drop-shadow-md">
                 "Những điều đẹp đẽ nhất thường bắt đầu từ những điều rất nhỏ bé."
               </p>
-              <p className="mt-3 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-medium">— Lặng 24 —</p>
+              <p className="mt-3 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-script">— Lặng 24 —</p>
             </div>
           </section>
 
@@ -216,7 +226,7 @@ export default async function HomePage({
       {isFirstPage && (
         <section className="grid md:grid-cols-12 gap-6">
           {/* Bài viết yêu thích */}
-          <div className="md:col-span-4 card p-5 bg-[#fbf9f5]">
+          <div className="md:col-span-4 card p-5 bg-transparent">
             <h3 className="font-bold mb-4 text-gray-900 dark:text-gray-100 text-sm">Bài viết được yêu thích</h3>
             <ol className="space-y-3">
               {popular.length === 0 && <li className="text-xs text-gray-400">Chưa có dữ liệu.</li>}
@@ -243,7 +253,7 @@ export default async function HomePage({
 
           {/* Thẻ & Cảm hứng */}
           <div className="md:col-span-4 flex flex-col gap-4">
-            <div className="card p-5 bg-[#fbf9f5] flex-1">
+            <div className="card p-5 bg-transparent flex-1">
               <h3 className="font-bold mb-3 text-gray-900 dark:text-gray-100 text-sm">Chủ đề thịnh hành</h3>
               <div className="flex flex-wrap gap-1.5">
                 {trendingTags.map((tag) => (
@@ -258,7 +268,7 @@ export default async function HomePage({
               </div>
             </div>
 
-            <div className="card p-5 bg-[#fbf9f5] dark:bg-brand-800/60 relative overflow-hidden flex items-center justify-between min-h-[100px]">
+            <div className="card p-5 bg-transparent dark:bg-brand-800/60 relative overflow-hidden flex items-center justify-between min-h-[100px]">
               {/* Khối chữ: Tự động co giãn max-width theo mobile/desktop */}
               <div className="relative z-10 max-w-[65%] sm:max-w-[70%]">
                 <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-1">

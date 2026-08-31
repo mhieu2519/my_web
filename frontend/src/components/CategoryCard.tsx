@@ -40,7 +40,7 @@ export default function CategoryCard({
                     <div className="text-xl text-[#3a5a40] dark:text-brand-300 group-hover:scale-110 transition-transform">
                         <Icon />
                     </div>
-                    <h3 className="font-bold text-base text-gray-900 dark:text-gray-100 font-serif">
+                    <h3 className="text-base text-gray-900 dark:text-gray-100 font-display">
                         {title}
                     </h3>
                 </div>
@@ -49,7 +49,7 @@ export default function CategoryCard({
                     {description}
                 </p>
 
-                {/* Nút Khám phá (ĐÃ BỎ GẠCH CHÂN) */}
+                {/* Nút Khám phá */}
                 <div className="mt-4">
                     <span className="text-xs font-semibold text-[#3a5a40] dark:text-brand-300 inline-flex items-center gap-1 group-hover:text-[#2d4632]">
                         <span>Khám phá</span>

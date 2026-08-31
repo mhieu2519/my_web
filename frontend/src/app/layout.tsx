@@ -4,6 +4,8 @@ import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Analytics } from '@vercel/analytics/react';
+import localFont from 'next/font/local'
 
 const sora = Sora({
   variable: '--font-sora',
@@ -16,14 +18,22 @@ const dancingScript = Dancing_Script({
   weight: ['400', '500', '700'],
   display: 'swap',
 });
-
+/*
 const fraunces = Fraunces({
-  variable: '--font-display',
+  variable: '--font-fraunces',
   subsets: ['latin', 'latin-ext'],
   weight: ['500', '600', '700'],
   style: ['normal', 'italic'],
   display: 'swap',
 });
+*/
+const momoSignature = localFont({
+  src: './fonts/MomoSignature-Regular.woff2',
+  weight: '400',
+  variable: '--font-display',
+  display: 'swap',
+})
+
 
 export const metadata: Metadata = {
   title: 'Lặng 24',
@@ -37,13 +47,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <body className={`${sora.variable} ${dancingScript.variable} ${fraunces.variable} antialiased flex flex-col min-h-screen overflow-x-hidden `}>
+    <html lang="vi" suppressHydrationWarning className={`${sora.variable} ${dancingScript.variable} ${momoSignature.variable} `}>
+      <body className={"antialiased flex flex-col min-h-screen overflow-x-hidden "}>
         <AuthProvider>
           <Header />
           <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-10">{children}</main>
           <Footer />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

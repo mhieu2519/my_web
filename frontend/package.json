@@ -12,6 +12,7 @@
     "@tiptap/extension-image": "^2.7.4",
     "@tiptap/react": "^2.7.4",
     "@tiptap/starter-kit": "^2.7.4",
+    "@vercel/analytics": "^2.0.1",
     "axios": "^1.7.7",
     "date-fns": "^3.6.0",
     "framer-motion": "^13.0.0",

@@ -18,6 +18,7 @@ import { IoMdLogIn } from 'react-icons/io';
 import { AiOutlineTags } from 'react-icons/ai';
 import { FcSearch } from "react-icons/fc";
 import { IoMoonOutline, IoSunnyOutline } from 'react-icons/io5';
+import { PiReadCvLogo } from "react-icons/pi";
 
 const NAV_LINKS = [
   { label: 'Trang chủ', href: '/' },
@@ -76,7 +77,7 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center gap-6 text-sm font-display">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href;
             return (
@@ -176,11 +177,11 @@ export default function Header() {
                     className="rounded-full ring-2 ring-brand-100 dark:ring-brand-700 object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white text-sm font-display">
                     {user.name?.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:inline">
+                <span className="text-sm font-display text-gray-700 dark:text-gray-200 hidden sm:inline">
                   {user.name}
                 </span>
               </button>
@@ -190,7 +191,7 @@ export default function Header() {
                   <Link
                     href="/profile"
                     onClick={() => setOpenMenu(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-700 dark:text-gray-200"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-700 dark:text-gray-200 font-display"
                   >
                     <CgProfile className="text-brand-500" />
                     Hồ sơ
@@ -201,15 +202,23 @@ export default function Header() {
                       <Link
                         href="/admin/dashboard"
                         onClick={() => setOpenMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 font-medium"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 font-display"
                       >
                         <MdOutlineAdminPanelSettings />
                         Quản trị
                       </Link>
                       <Link
+                        href="/cv-hnm"
+                        onClick={() => setOpenMenu(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 "
+                      >
+                        <PiReadCvLogo />
+                        CV
+                      </Link>
+                      <Link
                         href="/admin/posts/new"
                         onClick={() => setOpenMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-700 dark:text-gray-200"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-gray-700 dark:text-gray-200 font-display"
                       >
                         <IoCreateOutline />
                         Viết bài mới
@@ -220,7 +229,7 @@ export default function Header() {
                       <Link
                         href="/write"
                         onClick={() => setOpenMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 font-medium"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-700 text-sm text-brand-600 dark:text-brand-300 font-display"
                       >
                         <IoCreateOutline />
                         Viết bài
@@ -243,7 +252,7 @@ export default function Header() {
                       setOpenMenu(false);
                       logout();
                     }}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 text-sm text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 text-sm text-red-600 dark:text-red-400 font-display"
                   >
                     <IoLogOutOutline />
                     Đăng xuất
@@ -254,7 +263,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-gradient text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-gradient text-white text-sm hover:opacity-90 transition-opacity font-display"
             >
               <IoMdLogIn size={18} />
               <span className="hidden sm:inline">Đăng nhập</span>

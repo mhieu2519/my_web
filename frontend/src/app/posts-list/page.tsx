@@ -4,12 +4,18 @@ import Pagination from '@/components/Pagination';
 import NewsletterForm from '@/components/NewsletterForm';
 import type { PostSummary } from '@/components/PostList';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 const PAGE_SIZE = 8;
 
 type TagRow = { id: string; name: string; slug: string; _count: { posts: number } };
 type PopularPost = { id: string; slug: string; title: string; coverImage: string | null; views: number };
+
+export const metadata: Metadata = {
+    title: 'Tất cả bài viết — Lặng 24',
+    description: 'Toàn bộ bài viết công nghệ, thơ ca, du ký, cảm hứng tại Lặng 24.',
+};
 
 async function getPosts(page: number, tag?: string, sort?: string) {
     try {

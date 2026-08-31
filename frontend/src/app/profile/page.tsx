@@ -192,12 +192,12 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className="card p-8 mt-6 space-y-5">
+            <div className="card p-8 mt-6 space-y-5 bg-transparent">
                 <h2 className="text-sm font-bold text-gray-800">Thông tin hồ sơ</h2>
 
                 <div>
                     <label className="block text-sm font-medium mb-1.5 text-gray-700">Tên hiển thị</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors" />
+                    <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors bg-transparent" />
                 </div>
 
                 <div>
@@ -207,12 +207,12 @@ export default function ProfilePage() {
 
                 <div>
                     <label className="block text-sm font-medium mb-1.5 text-gray-700">Giới thiệu ngắn (bio)</label>
-                    <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={300} placeholder="Yêu công nghệ, thích du lịch và những điều đẹp đẽ..." className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors resize-none" />
+                    <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={300} placeholder="Yêu công nghệ, thích du lịch và những điều đẹp đẽ..." className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors resize-none bg-transparent" />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium mb-1.5 text-gray-700">Địa điểm</label>
-                    <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Hà Nội, Việt Nam" className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors" />
+                    <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Hà Nội, Việt Nam" className="w-full border-2 border-brand-100 rounded-xl px-4 py-2.5 focus:border-brand-400 focus:outline-none transition-colors " />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -242,7 +242,7 @@ export default function ProfilePage() {
                 </button>
             </div>
 
-            <div className="card p-8 mt-6 space-y-5">
+            <div className="card p-8 mt-6 space-y-5 bg-transparent">
                 <h2 className="text-sm font-bold text-gray-800">Đổi mật khẩu</h2>
                 <div>
                     <label className="block text-sm font-medium mb-1.5 text-gray-700">Mật khẩu hiện tại</label>
@@ -265,7 +265,7 @@ export default function ProfilePage() {
                 </button>
             </div>
 
-            <div className="card p-8 mt-6 space-y-4">
+            <div className="card p-8 mt-6 space-y-4 bg-transparent">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-sm font-bold text-gray-800">Xác thực 2 lớp (2FA)</h2>

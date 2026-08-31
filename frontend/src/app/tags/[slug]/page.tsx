@@ -3,12 +3,26 @@ import PostList, { PostSummary } from '@/components/PostList';
 import Pagination from '@/components/Pagination';
 import NewsletterForm from '@/components/NewsletterForm';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 const PAGE_SIZE = 9;
 
 type TagRow = { id: string; name: string; slug: string; _count: { posts: number } };
 type PopularPost = { id: string; slug: string; title: string; coverImage: string | null; views: number };
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+    const tags = await getAllTags();
+    const tag = tags.find((t) => t.slug === params.slug);
+    const name = tag?.name || params.slug;
+    return {
+        title: `${name} — Lặng 24`,
+        description: `Các bài viết thuộc chuyên mục ${name.toLowerCase()} tại Lặng 24.`,
+        alternates: { canonical: `${SITE_URL}/tags/${params.slug}` },
+    };
+}
 
 async function getPostsByTag(slug: string, page: number) {
     try {

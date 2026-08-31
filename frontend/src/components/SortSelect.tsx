@@ -28,7 +28,7 @@ export default function SortSelect({ value }: { value: string }) {
         <select
             value={value}
             onChange={handleChange}
-            className="border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+            className="border-2 border-gray-200 dark:border-brand-700 dark:bg-brand-800 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:border-brand-400 focus:outline-none bg-transparent"
         >
             <option value="newest">Mới nhất</option>
             <option value="popular">Xem nhiều nhất</option>
